@@ -1,0 +1,14 @@
+{
+    "pin_buzz": 5,
+    "pin_screen_scl": 26,
+    "pin_screen_sda": 25,
+    "pin_key_up": 22,
+    "pin_key_down": 19,
+    "pin_key_left": 23,
+    "pin_key_right": 18,
+    "pin_key_a": 13,
+    "pin_key_b": 15,
+    "screen_width": 128,
+    "screen_height": 64,
+    "version": 1
+}
