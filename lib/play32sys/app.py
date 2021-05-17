@@ -60,7 +60,10 @@ def free():
     return gc.mem_free()
 
 def timed_function(f, *args, **kwargs):
-    myname = f.__name__
+    try:
+        myname = f.__name__
+    except:
+        myname = str(f)
     def new_func(*args, **kwargs):
         import utime
         print('Function [{}] Start'.format(myname))
@@ -72,7 +75,10 @@ def timed_function(f, *args, **kwargs):
     return new_func
 
 def timed_function_async(f, *args, **kwargs):
-    myname = f.__name__
+    try:
+        myname = f.__name__
+    except:
+        myname = str(f)
     async def new_func(*args, **kwargs):
         import utime
         print('Function [{}] Start'.format(myname))
