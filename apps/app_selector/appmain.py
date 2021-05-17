@@ -1,4 +1,4 @@
-from graphic import pbm
+from graphic import pbm, framebuf_helper
 from play32sys import path, app
 import framebuf, ujson, uos
 import hal_screen as screen
@@ -9,6 +9,8 @@ MANIFEST_FILE = "manifest.json"
 MANIFEST_KEY_NAME = "name"
 MANIFEST_KEY_ICON = "icon"
 ICON_SIZE = (48, 48)
+SCREEN_FORMAT = screen.get_format()
+COLOR_WHITE = framebuf_helper.get_white_color(SCREEN_FORMAT)
 
 THIS_APP_NAME = "app_selector"
 DEFAULT_ICON = None
@@ -31,6 +33,7 @@ def init():
         w, h, _, data, = pbm.read_image(f)[:4]
     assert (w, h) == ICON_SIZE
     DEFAULT_ICON = framebuf.FrameBuffer(data, w, h, framebuf.MONO_HLSB)
+    DEFAULT_ICON = framebuf_helper.ensure_same_format(DEFAULT_ICON, framebuf.MONO_HLSB, w, h, SCREEN_FORMAT, COLOR_WHITE)
     app_list = []
     for info in uos.ilistdir(path.get_app_path("/")):
         file_name = info[0]
@@ -56,6 +59,7 @@ def get_app_info(app_name):
             w, h, _, data, = pbm.read_image(f)[:4]
         assert (w, h) == ICON_SIZE
         icon = framebuf.FrameBuffer(data, w, h, framebuf.MONO_HLSB)
+        icon = framebuf_helper.ensure_same_format(icon, framebuf.MONO_HLSB, w, h, SCREEN_FORMAT, COLOR_WHITE)
         return display_name, icon
     except:
         return display_name, DEFAULT_ICON
@@ -69,12 +73,12 @@ def render_point_app():
     display_name, display_icon = get_app_info(app_name)
     # draw arrows
     offset_x_arrows_right = screen.get_size()[0] - FONT_8.get_font_size()[0]
-    FONT_8.draw_on_frame("<", frame, 0, 24, 1)
-    FONT_8.draw_on_frame(">", frame, offset_x_arrows_right, 24, 1)
+    FONT_8.draw_on_frame("<", frame, 0, 24, COLOR_WHITE)
+    FONT_8.draw_on_frame(">", frame, offset_x_arrows_right, 24, COLOR_WHITE)
     # draw app_name
     width_display_name = FONT_8.get_font_size()[0] * len(display_name)
     offset_x_display_name = (screen.get_size()[0] - width_display_name) // 2
-    FONT_8.draw_on_frame(display_name, frame, offset_x_display_name, 56, 1)
+    FONT_8.draw_on_frame(display_name, frame, offset_x_display_name, 56, COLOR_WHITE)
     # draw icon
     offset_x_icon = (screen.get_size()[0] - ICON_SIZE[0]) // 2
     frame.blit(display_icon, offset_x_icon, 0)

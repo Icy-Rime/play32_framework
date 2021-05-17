@@ -1,5 +1,14 @@
-import framebuf
-from graphic import pbm
+import framebuf, hal_screen
+from graphic import pbm, framebuf_helper
+import gc
+SCREEN_FORMAT = hal_screen.get_format()
+SPRIT_FORMAT = framebuf.MONO_HLSB
+COLOR_WHITE = framebuf_helper.get_white_color(SCREEN_FORMAT)
+
+def get_color_or_white(r, g, b):
+    if SCREEN_FORMAT == framebuf.RGB565:
+        return framebuf_helper.color565(r, g, b)
+    return COLOR_WHITE
 
 class Sprite():
     def __init__(self, box=(0, 0, 0, 0), img=None, key=None):
@@ -60,14 +69,18 @@ def is_sprite_collide(s1, s2):
             return True
     return False
 
-def load_sprite(img_path):
+def load_sprite(img_path, color=COLOR_WHITE):
     with open(img_path, "rb") as in_stream:
         w, h, format, data, comment = pbm.read_image(in_stream)
-    img = framebuf.FrameBuffer(data, w, h, framebuf.MONO_HLSB)
+    img = framebuf.FrameBuffer(data, w, h, SPRIT_FORMAT)
+    img = framebuf_helper.ensure_same_format(img, SPRIT_FORMAT, w, h, SCREEN_FORMAT, color)
+    gc.collect()
     return Sprite((0, 0, w, h), img)
 
 def new_sprite(w, h):
     wp = w // 8
     wp += 0 if w % 8 == 0 else 1
-    img = framebuf.FrameBuffer(bytearray(wp * h), w, h, framebuf.MONO_HLSB)
+    img = framebuf.FrameBuffer(bytearray(wp * h), w, h, SPRIT_FORMAT)
+    img = framebuf_helper.ensure_same_format(img, SPRIT_FORMAT, w, h, SCREEN_FORMAT, COLOR_WHITE)
+    gc.collect()
     return Sprite((0, 0, w, h), img)

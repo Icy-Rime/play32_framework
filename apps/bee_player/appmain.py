@@ -1,9 +1,11 @@
 import hal_screen, hal_keypad, hal_buzz, uos
 from play32sys import app, path
+from graphic import framebuf_helper
 from play32hw.buzz_note_sound import BuzzNoteSoundFile
 from resource.font import get_font_8px, get_font_16px
 FONT_8 = get_font_8px()
 FONT_16 = get_font_16px()
+COLOR_WHITE = framebuf_helper.get_white_color(hal_screen.get_format())
 
 bee = None
 buzz_sound_file = None
@@ -32,19 +34,19 @@ def render_status():
     scr_w, scr_h = hal_screen.get_size()
     fnt_w, fnt_h = FONT_8.get_font_size()
     # help text
-    FONT_8.draw_on_frame("B: Exit   A: P/S", frame, 0, scr_h - fnt_h, 1)
+    FONT_8.draw_on_frame("B: Exit   A: P/S", frame, 0, scr_h - fnt_h, COLOR_WHITE)
     # volume
-    FONT_8.draw_on_frame("Up/Down: Vol   {:1d}".format(bee.volume), frame, 0, scr_h - fnt_h*2, 1)
+    FONT_8.draw_on_frame("Up/Down: Vol   {:1d}".format(bee.volume), frame, 0, scr_h - fnt_h*2, COLOR_WHITE)
     # playing status
-    FONT_8.draw_on_frame("<", frame, 0, scr_h - fnt_h*3, 1)
-    FONT_8.draw_on_frame(">", frame, scr_w - fnt_w, scr_h - fnt_h*3, 1)
+    FONT_8.draw_on_frame("<", frame, 0, scr_h - fnt_h*3, COLOR_WHITE)
+    FONT_8.draw_on_frame(">", frame, scr_w - fnt_w, scr_h - fnt_h*3, COLOR_WHITE)
     status_text = "Playing" if bee.is_playing else "Stoped"
     status_text_width = len(status_text) * fnt_w
     status_text_offset_x = (scr_w - (fnt_w*2) - status_text_width) // 2 + fnt_w
-    FONT_8.draw_on_frame(status_text, frame, status_text_offset_x, scr_h - fnt_h*3, 1, scr_w - (fnt_w*2), fnt_h)
+    FONT_8.draw_on_frame(status_text, frame, status_text_offset_x, scr_h - fnt_h*3, COLOR_WHITE, scr_w - (fnt_w*2), fnt_h)
     # sounds name
     sound_name = bns_list[current_playing]
-    FONT_16.draw_on_frame(sound_name, frame, 0, 0, 1, scr_w, scr_h - fnt_h*3)
+    FONT_16.draw_on_frame(sound_name, frame, 0, 0, COLOR_WHITE, scr_w, scr_h - fnt_h*3)
     hal_screen.refresh()
 
 def keypad_event():

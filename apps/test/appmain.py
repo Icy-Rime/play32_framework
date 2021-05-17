@@ -1,11 +1,12 @@
 import hal_screen, hal_keypad, utime
-from graphic import framebuf_console
+from graphic import framebuf_console, framebuf_helper
 from play32sys import app
 from resource.font import get_font_8px
 FONT_8 = get_font_8px()
 console = framebuf_console.Console(
     hal_screen.get_framebuffer(), *hal_screen.get_size(),
-    font_draw=FONT_8, color=1,
+    font_draw=FONT_8,
+    color=framebuf_helper.get_white_color(hal_screen.get_format()),
     display_update_fun=lambda: hal_screen.refresh()
 )
 

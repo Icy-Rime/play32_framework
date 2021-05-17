@@ -2,8 +2,10 @@
     "files.eol": "\n",
     "python.autoComplete.extraPaths": [
         "lib",
+        "D:\\CODE\\Python\\play32_dev\\lib",
     ],
     "python.analysis.extraPaths": [
         "lib",
+        "D:\\CODE\\Python\\play32_dev\\lib",
     ]
 }

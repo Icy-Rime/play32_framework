@@ -1,7 +1,8 @@
 from os import stat
-import hal_keypad, gc
+import hal_screen, hal_keypad, gc
 import t_rex_sence, t_rex_sprite, t_rex_sfx
 from play32sys import app, path
+from graphic import framebuf_helper
 from utime import ticks_ms, ticks_diff
 from uos import urandom
 DEFAULT_SPEED = 40
@@ -204,7 +205,7 @@ def _update_global(time_ms):
     # update score
     score += (speed / 8) * (time_ms / 1000)
     score_sprite.img.fill(0)
-    score_sprite.img.text(str(int(score)), 0, 0, 1)
+    score_sprite.img.text(str(int(score)), 0, 0, t_rex_sprite.COLOR_WHITE)
     # update speed
     speed = speed + (1 * (time_ms / 1000))
     roads.set_speed(speed)
@@ -244,7 +245,7 @@ def init(app_path):
         "t_rex_crash.pbm",
     ]:
         img_path = path.join(img_dir, name)
-        sprite = t_rex_sprite.load_sprite(img_path)
+        sprite = t_rex_sprite.load_sprite(img_path, t_rex_sprite.COLOR_WHITE)
         sprite.key = 0
         t_rexs.append(sprite)
     for name in [
@@ -258,7 +259,7 @@ def init(app_path):
         "road_7.pbm",
     ]:
         img_path = path.join(img_dir, name)
-        sprite = t_rex_sprite.load_sprite(img_path)
+        sprite = t_rex_sprite.load_sprite(img_path, t_rex_sprite.get_color_or_white(0xFF, 0x00, 0x00))
         sprite.key = 0
         road_sprites.append(sprite)
     for name in [
@@ -267,11 +268,11 @@ def init(app_path):
         "cactus_low.pbm",
     ]:
         img_path = path.join(img_dir, name)
-        sprite = t_rex_sprite.load_sprite(img_path)
+        sprite = t_rex_sprite.load_sprite(img_path, t_rex_sprite.get_color_or_white(0x00, 0xFF, 0x00))
         sprite.key = 0
         barrier_sprites.append(sprite)
     img_path = path.join(img_dir, "cloud.pbm")
-    sprite = t_rex_sprite.load_sprite(img_path)
+    sprite = t_rex_sprite.load_sprite(img_path, t_rex_sprite.get_color_or_white(0x00, 0x8F, 0xFF))
     sprite.key = 0
     cloud_sprite = sprite
     # other sprites
@@ -281,10 +282,10 @@ def init(app_path):
     gameover_sprite.key = 0
     gameover_sprite_x = (t_rex_sence.screen_width - 8*8) // 2
     gameover_sprite.move_to(gameover_sprite_x, 8)
-    gameover_sprite.img.text("GameOver", 0, 0, 1)
+    gameover_sprite.img.text("GameOver", 0, 0, t_rex_sprite.COLOR_WHITE)
     high_score_sprite = t_rex_sprite.new_sprite(t_rex_sence.screen_width, 16)
     high_score_sprite.key = 0
-    high_score_sprite.img.text("HIGH:", 0, 0, 1)
+    high_score_sprite.img.text("HIGH:", 0, 0, t_rex_sprite.COLOR_WHITE)
     # object
     t_rex = TRex(t_rexs)
     roads = Road(road_sprites)
@@ -295,7 +296,7 @@ def ready():
     global status, speed
     # update high score
     high_score_sprite.img.fill_rect(0, 8, t_rex_sence.screen_width, 8, 0)
-    high_score_sprite.img.text(str(int(high_score)), 0, 8, 1)
+    high_score_sprite.img.text(str(int(high_score)), 0, 8, t_rex_sprite.COLOR_WHITE)
     # reset status
     status = 0
     speed = DEFAULT_SPEED
