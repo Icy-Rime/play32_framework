@@ -16,3 +16,23 @@ def connect(waiting=False):
         while waiting and not wlan.isconnected():
             pass
     return wlan
+
+def ap(ssid="Play32AP", passwd="12345678"):
+    ap = network.WLAN(network.AP_IF)
+    ap.active(True)
+    ap.config(dhcp_hostname="play32")
+    ap.config(essid=ssid)
+    ap.config(max_clients=16)
+    ap.config(hidden=False)
+    if passwd == None or passwd == "":
+        ap.config(authmode=network.AUTH_OPEN)
+    else:
+        ap.config(password=passwd)
+        ap.config(authmode=network.AUTH_WPA_WPA2_PSK)
+    return ap
+
+def deactive_all():
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(False)
+    ap = network.WLAN(network.AP_IF)
+    ap.active(False)

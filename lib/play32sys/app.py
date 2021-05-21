@@ -1,13 +1,29 @@
 import uos as os
 import usys as sys
 from play32hw.rtc_memory import rtc_dict
-from play32sys.path import join, get_app_path, _get_curr_app, _set_curr_app
+from play32sys.path import get_app_path, _get_curr_app, _set_curr_app, get_component_path
 from machine import reset
 import gc
 
 KEY_BOOT_APP = 'bapp'
 KEY_BOOT_APP_PARAMS = 'bappp'
 KEY_BOOT_APP_KEYWORDS = 'bappk'
+
+# system function
+def _on_boot_(debug=False):
+    sys.path[:] = ['', 'lib', '/', '/lib']
+    boot_app, args, kws = get_boot_app()
+    if isinstance(boot_app, str) and boot_app != "":
+        # app.clear_boot_app()
+        try:
+            run_app(boot_app, *args, **kws)
+        except Exception as e:
+            import usys
+            usys.print_exception(e)
+            if not debug:
+                reset_and_run_app("")
+    else:
+        call_component('app_selector')
 
 # app function
 def get_env(env_name, default=None):
@@ -41,17 +57,31 @@ def reset_and_run_app(app_name, *args, **kws):
     reset()
 
 def run_app(app_name, *args, **kws):
-    sys.path[:] = ['', 'lib', '/', '/lib']
     curr = os.getcwd()
     c_a = _get_curr_app()
     _set_curr_app(app_name)
     os.chdir(get_app_path(app_name))
     try:
-        import appmain
-        return appmain.main(app_name, *args, **kws)
+        module = __import__("appmain")
+        if "appmain" in sys.modules:
+            del sys.modules["appmain"]
+        return module.main(app_name, *args, **kws)
     finally:
         os.chdir(curr)
         _set_curr_app(c_a)
+        gc.collect()
+
+def call_component(component_name, *args, **kws):
+    curr = os.getcwd()
+    os.chdir(get_component_path(component_name))
+    try:
+        module = __import__("appmain")
+        if "appmain" in sys.modules:
+            del sys.modules["appmain"]
+        return module.main(component_name, *args, **kws)
+    finally:
+        os.chdir(curr)
+        gc.collect()
 
 # debug function
 def free():

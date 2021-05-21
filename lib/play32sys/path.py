@@ -6,6 +6,7 @@ FILE_TYPE_FILE = 0X8000
 __ROOT_BASE = '/'
 __APP_BASE = '/apps'
 __DATA_BASE = '/data'
+__COMPONENT_BASE = '/components'
 __cur_app = ''
 
 def _get_curr_app():
@@ -43,14 +44,27 @@ def exist(pt):
 
 def get_app_path(name='/'):
     # type: (str) -> str
-    if __cur_app == '/':
-        return __ROOT_BASE
+    if name == '/':
+        return __APP_BASE
     else:
         return join(__APP_BASE, name)
 
 def get_data_path(name='/'):
     # type: (str) -> str
-    if __cur_app == '/':
+    if name == '/':
         return __DATA_BASE
     else:
         return join(__DATA_BASE, name)
+
+def get_component_path(name='/'):
+    if name == '/':
+        return __COMPONENT_BASE
+    else:
+        return join(__COMPONENT_BASE, name)
+
+def __ensure_dir__():
+    if not exist(__APP_BASE):
+        uos.mkdir(__APP_BASE)
+    if not exist(__DATA_BASE):
+        uos.mkdir(__DATA_BASE)
+__ensure_dir__()

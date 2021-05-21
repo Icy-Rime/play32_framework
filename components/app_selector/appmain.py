@@ -29,7 +29,7 @@ def main(app_name, *args, **kws):
 
 def init():
     global DEFAULT_ICON, app_list, app_pointer
-    with open(path.join(path.get_app_path(THIS_APP_NAME), "images", "fallback_icon.pbm"), "rb") as f:
+    with open(path.join(path.get_component_path(THIS_APP_NAME), "images", "fallback_icon.pbm"), "rb") as f:
         w, h, _, data, = pbm.read_image(f)[:4]
     assert (w, h) == ICON_SIZE
     DEFAULT_ICON = framebuf.FrameBuffer(data, w, h, framebuf.MONO_HLSB)
@@ -65,11 +65,14 @@ def get_app_info(app_name):
         return display_name, DEFAULT_ICON
 
 def render_point_app():
-    if app_pointer < 0:
-        return
-    app_name = app_list[app_pointer]
     frame = screen.get_framebuffer()
     frame.fill(0)
+    if app_pointer < 0:
+        FONT_8.draw_on_frame("No Apps.", frame, 0, 0, COLOR_WHITE)
+        FONT_8.draw_on_frame("Press B to enter FTP mode.", frame, 0, 8, COLOR_WHITE)
+        screen.refresh()
+        return
+    app_name = app_list[app_pointer]
     display_name, display_icon = get_app_info(app_name)
     # draw arrows
     offset_x_arrows_right = screen.get_size()[0] - FONT_8.get_font_size()[0]
@@ -106,6 +109,7 @@ def main_loop():
     KEY_LEFT = keypad.KEY_LEFT
     KEY_RIGHT = keypad.KEY_RIGHT
     KEY_A = keypad.KEY_A
+    KEY_B = keypad.KEY_B
     SIZE = len(app_list)
     while True:
         for event in get_key_event():
@@ -122,3 +126,7 @@ def main_loop():
                     render_point_app()
                 if key == KEY_A:
                     run_app()
+                if key == KEY_B:
+                    # entering setup mode
+                    app.call_component("ftp_mode")
+                    app.reset_and_run_app("") # reset
