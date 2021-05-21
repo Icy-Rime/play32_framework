@@ -69,7 +69,7 @@ def render_point_app():
     frame.fill(0)
     if app_pointer < 0:
         FONT_8.draw_on_frame("No Apps.", frame, 0, 0, COLOR_WHITE)
-        FONT_8.draw_on_frame("Press B to enter FTP mode.", frame, 0, 8, COLOR_WHITE)
+        FONT_8.draw_on_frame("Press B to enter FTP mode.", frame, 0, 8, COLOR_WHITE, screen.get_size()[0], screen.get_size()[1]-8)
         screen.refresh()
         return
     app_name = app_list[app_pointer]
