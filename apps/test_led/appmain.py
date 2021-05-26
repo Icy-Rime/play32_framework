@@ -23,14 +23,14 @@ def render():
     space_x = (W - require_pixel_w) // 4
     start_x = space_x
     frame = hal_screen.get_framebuffer()
-    frame.fill_rect(start_x, start_y, require_pixel_w + (space_x * 2), require_pixel_h, 0)
+    frame.fill(0)
     for i in range(3):
         text = "{:^ 3}".format(color[i])
         frame.text(text, start_x, start_y + 12, WHITE)
         if point == i:
             frame.text(" + ", start_x, start_y, WHITE)
             frame.text(" - ", start_x, start_y + 24, WHITE)
-        start_x += space_x
+        start_x += space_x + 24
     hal_screen.refresh()
 
 
