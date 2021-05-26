@@ -14,5 +14,6 @@
     "pin_screen_cs": 14,
     "pin_screen_dc": 12,
     "pin_screen_rst": 27,
+    "pin_led": 27,
     "version": 1
 }

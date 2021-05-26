@@ -19,4 +19,5 @@ PIN_KEY_DOWN = __json["pin_key_down"]
 PIN_KEY_LEFT = __json["pin_key_left"]
 PIN_KEY_RIGHT = __json["pin_key_right"]
 PIN_BUZZ = __json["pin_buzz"]
+PIN_LED = __json["pin_led"]
 del __p, __json
