@@ -1,7 +1,7 @@
 import hal_keypad, ntptime
 from play32sys import app, network_helper
 from hashlib import sha1
-from utils.hamc import HAMC
+from utils.hmac import HMAC
 from binascii import b2a_base64
 from uhttp import urequests
 from uhttp.url import url_encode, encode_url_params
@@ -10,7 +10,7 @@ from config import PUBLIC_KEY, PRIVATE_KEY
 # config.py:
 # PUBLIC_KEY = ""
 # PRIVATE_KEY = ""
-#
+# 
 
 def encode_xin_zhi_weather_url_v4(public_key, private_key, pdict, ttl=300):
     pdict["public_key"] = public_key
@@ -27,7 +27,7 @@ def encode_xin_zhi_weather_url_v4(public_key, private_key, pdict, ttl=300):
         params += "&"
     if len(keys) > 0:
         params = params[:-1]
-    sig = HAMC(private_key, params, sha1).digest()
+    sig = HMAC(private_key, params, sha1).digest()
     params += "&sig="
     params += url_encode(b2a_base64(sig).decode("ascii").strip())
     return "https://api.seniverse.com/v4?" + params
@@ -50,7 +50,7 @@ def encode_xin_zhi_weather_url_v3(public_key, private_key, api_path, pdict, ttl=
     if len(keys) > 0:
         params = params[:-1]
     print(params)
-    sig = HAMC(private_key, params, sha1).digest()
+    sig = HMAC(private_key, params, sha1).digest()
     params += "&sig="
     params += url_encode(b2a_base64(sig).decode("ascii").strip())
     params = encode_url_params(pdict) + "&" + params

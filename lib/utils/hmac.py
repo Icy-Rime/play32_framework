@@ -1,6 +1,6 @@
 from ubinascii import hexlify
 # see https://en.wikipedia.org/wiki/HMAC#Implementation
-class HAMC():
+class HMAC():
     def __init__(self, key, msg=bytearray(), digestmod=None, block_size_in_bit=512):
         # type: (bytes, bytearray, any, int) -> None
         block_size = block_size_in_bit // 8
