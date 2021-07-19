@@ -1,8 +1,6 @@
-from os import stat
-import hal_screen, hal_keypad, gc
+import hal_keypad
 import t_rex_sence, t_rex_sprite, t_rex_sfx
 from play32sys import app, path
-from graphic import framebuf_helper
 from utime import ticks_ms, ticks_diff
 from uos import urandom
 DEFAULT_SPEED = 40
@@ -349,4 +347,5 @@ def main_loop():
         if status == 1:
             _update_global(time_ms)
         t_rex_sence.render()
-        gc.collect()
+        # print(gc.mem_free())
+        # gc.collect() # so slow...
