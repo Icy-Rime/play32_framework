@@ -1,5 +1,5 @@
 # path operation
-import uos, uio
+import uos
 FILE_TYPE_DIR = 0x4000
 FILE_TYPE_FILE = 0X8000
 
@@ -17,7 +17,7 @@ def _set_curr_app(app):
     global __cur_app
     __cur_app = app
 
-class TemporaryFileContext(uio.IOBase):
+class TemporaryFileContext():
     def __init__(self, path):
         self.__p = path
         self.__f = None
