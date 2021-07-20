@@ -19,14 +19,13 @@ battery_level = []
 top_battery_level = 0
 
 def main(app_name, *args, **kws):
-    global last_log, record_path, last_record_ms
+    global last_log, record_path
     # init log
     for _ in range(1024):
         last_log.append(hal_battery.get_raw_battery_value())
     app_data_path = path.get_data_path(app_name)
     app_tmp_path = path.get_tmp_path(app_name)
     record_path = path.join(app_data_path, "battery.log")
-    last_record_ms = ticks_ms()
     path.mkdirs(app_data_path)
     path.mkdirs(app_tmp_path)
     # loop
@@ -130,6 +129,7 @@ def render_failed():
 
 def main_loop():
     global record_file, last_record_ms, status, top_battery_level
+    last_record_ms = ticks_ms()
     while True:
         # 处理按键事件
         for event in hal_keypad.get_key_event():
