@@ -60,9 +60,9 @@ def main_loop():
                     hold_value = 0 # 取消按住按键的变化
                 elif key == hal_keypad.KEY_UP or key == hal_keypad.KEY_DOWN:
                     hold_value += 1 if key == hal_keypad.KEY_UP else -1
-                    # 执行一次
-                    color[point] += hold_value
-                    color[point] %= 256
+                    # # 执行一次
+                    # color[point] += hold_value
+                    # color[point] %= 256
                     # 保持按住的状态的话，会在一定时间后继续执行
                     hold_timer = utime.ticks_ms()
                 elif key == hal_keypad.KEY_B:
