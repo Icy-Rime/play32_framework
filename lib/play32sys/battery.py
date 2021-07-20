@@ -1,8 +1,10 @@
 from play32sys import path
 import hal_battery
 BATTERY_RECORD_PATH = path.join(path.get_data_path(), "battery.dat")
+DEFAULT_BATTERY_CACHE_SIZE = 1024
 
 __battery_level = []
+__last_log = []
 
 def load_battery_level():
     global __battery_level
@@ -15,11 +17,23 @@ def load_battery_level():
             __battery_level.append(int.from_bytes(data, "big"))
     __battery_level.sort() # from small to big
 
+def init_battery_value_cache(size=DEFAULT_BATTERY_CACHE_SIZE):
+    __last_log.clear()
+    for _ in range(size):
+        __last_log.append(hal_battery.get_raw_battery_value())
+
+def measure():
+    __last_log.append(hal_battery.get_raw_battery_value())
+    __last_log.pop(0)
+
 def get_battery_level():
     try:
         if len(__battery_level) <= 0:
             load_battery_level()
-        value = hal_battery.get_raw_battery_value()
+        if len(__last_log) <= 0:
+            init_battery_value_cache()
+        measure()
+        value = sum(__last_log) // len(__last_log)
         btl = len(__battery_level)
         for i in range(btl):
             if __battery_level[i] > value:

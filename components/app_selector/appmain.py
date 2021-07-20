@@ -1,9 +1,11 @@
 from graphic import pbm, framebuf_helper
 from play32sys import path, app, battery
+from play32hw import cpu
 import framebuf, ujson, uos
 import hal_screen as screen
 import hal_keypad as keypad
 from resource.font import get_font_8px
+from utime import ticks_ms, ticks_diff, ticks_add
 FONT_8 = get_font_8px()
 MANIFEST_FILE = "manifest.json"
 MANIFEST_KEY_NAME = "name"
@@ -93,7 +95,9 @@ def render_battery_level():
     battery_level = str(battery.get_battery_level())
     width_battery_level = FNT_W * len(battery_level)
     offset_x_battery_level = SCR_W - width_battery_level
-    frame.fill_rect(offset_x_battery_level, 0, width_battery_level, FNT_H, 0)
+    width_clear = FNT_W * 3 # 100 battery
+    offset_x_clear = SCR_W - width_clear
+    frame.fill_rect(offset_x_clear, 0, width_clear, FNT_H, 0)
     FONT_8.draw_on_frame(battery_level, frame, offset_x_battery_level, 0, COLOR_WHITE)
 
 def run_app():
@@ -120,7 +124,10 @@ def main_loop():
     KEY_A = keypad.KEY_A
     KEY_B = keypad.KEY_B
     SIZE = len(app_list)
+    t_update_battery_ms = ticks_ms()
+    cpu.set_cpu_speed(cpu.VERY_SLOW)
     while True:
+        should_refresh_screen = False
         for event in get_key_event():
             event_type, key = parse_key_event(event)
             if event_type == keypad.EVENT_KEY_PRESS:
@@ -132,12 +139,22 @@ def main_loop():
                 if key == KEY_LEFT or key == KEY_RIGHT:
                     if 0 > app_pointer or SIZE <= app_pointer:
                         app_pointer = (app_pointer + SIZE) % SIZE
-                    render_point_app()
+                    with cpu.cpu_speed_context(cpu.FAST):
+                        render_point_app()
+                        render_battery_level()
+                    should_refresh_screen = True
                 if key == KEY_A:
                     run_app()
                 if key == KEY_B:
                     # entering setup mode
                     app.call_component("ftp_mode")
                     app.reset_and_run_app("") # reset
-        render_battery_level()
-        screen.refresh()
+        if ticks_diff(ticks_ms(), t_update_battery_ms) >= 5000:
+            t_update_battery_ms = ticks_add(t_update_battery_ms, 5000)
+            with cpu.cpu_speed_context(cpu.FAST):
+                render_battery_level()
+            should_refresh_screen = True
+        else:
+            battery.measure()
+        if should_refresh_screen:
+            screen.refresh()
