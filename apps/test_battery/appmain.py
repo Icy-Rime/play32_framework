@@ -19,13 +19,14 @@ battery_level = []
 top_battery_level = 0
 
 def main(app_name, *args, **kws):
-    global last_log, record_path
+    global last_log, record_path, last_record_ms
     # init log
     for _ in range(1024):
         last_log.append(hal_battery.get_raw_battery_value())
     app_data_path = path.get_data_path(app_name)
     app_tmp_path = path.get_tmp_path(app_name)
     record_path = path.join(app_data_path, "battery.log")
+    last_record_ms = ticks_ms()
     path.mkdirs(app_data_path)
     path.mkdirs(app_tmp_path)
     # loop
@@ -118,13 +119,13 @@ def render_battery_level_list():
 def render_success():
     buffer = hal_screen.get_framebuffer()
     buffer.fill(0)
-    buffer.text("successful!", 0, 0, WHITE)
+    buffer.text("Successful!", 0, 0, WHITE)
     hal_screen.refresh()
 
 def render_failed():
     buffer = hal_screen.get_framebuffer()
     buffer.fill(0)
-    buffer.text("successful!", 0, 0, WHITE)
+    buffer.text("Failed!", 0, 0, WHITE)
     hal_screen.refresh()
 
 def main_loop():
