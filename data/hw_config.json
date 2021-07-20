@@ -15,5 +15,6 @@
     "pin_screen_dc": 0,
     "pin_screen_rst": 0,
     "pin_led": 27,
+    "pin_battery": 36,
     "version": 1
 }

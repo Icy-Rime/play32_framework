@@ -7,11 +7,12 @@ print("gc threshold has been set to", _threshold)
 del _threshold
 
 # >>>> init <<<<
-import hal_screen, hal_keypad, hal_buzz, hal_led
+import hal_screen, hal_keypad, hal_buzz, hal_led, hal_battery
 hal_screen.init()
 hal_keypad.init()
 hal_buzz.init()
 hal_led.init()
+hal_battery.init()
 
 # >>>> main <<<<
 from play32sys import app

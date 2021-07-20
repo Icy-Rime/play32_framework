@@ -5,6 +5,7 @@ from play32sys.path import get_app_path, _get_curr_app, _set_curr_app, get_compo
 from machine import reset
 import gc
 
+VERSION = (1, 16, 0)
 KEY_BOOT_APP = 'bapp'
 KEY_BOOT_APP_PARAMS = 'bappp'
 KEY_BOOT_APP_KEYWORDS = 'bappk'
