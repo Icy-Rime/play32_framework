@@ -161,6 +161,8 @@ def main_loop():
                         app.call_component("ftp_mode")
                         render_point_app()
                         render_battery_level()
+                        t_update_battery_ms = ticks_ms()
+                        should_refresh_screen = True
                         import gc
                         gc.collect()
                         # app.reset_and_run_app("") # reset

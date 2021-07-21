@@ -1,7 +1,7 @@
 import uos, usys, ujson
 from play32sys.path import join, get_tmp_path, get_app_path, get_component_path, clear_temporary_dir
 from resource.image import PLAY32_ICON
-from machine import soft_reset as __soft_reset
+from machine import reset as __soft_reset
 import gc
 
 VERSION = (1, 16, 0)
