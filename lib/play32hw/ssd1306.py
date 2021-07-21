@@ -44,7 +44,7 @@ class SSD1306(framebuf.FrameBuffer):
 
     def init_display(self):
         for cmd in (
-            SET_DISP | 0x00, # off
+            # SET_DISP | 0x00, # off
             # address setting
             SET_MEM_ADDR, 0x00, # horizontal
             # resolution and layout

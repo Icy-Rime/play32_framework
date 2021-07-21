@@ -8,14 +8,6 @@ __APP_BASE = '/apps'
 __DATA_BASE = '/data'
 __TMP_BASE = '/tmp'
 __COMPONENT_BASE = '/components'
-__cur_app = ''
-
-def _get_curr_app():
-    return __cur_app
-
-def _set_curr_app(app):
-    global __cur_app
-    __cur_app = app
 
 class TemporaryFileContext():
     def __init__(self, path):
@@ -109,6 +101,11 @@ def get_component_path(name='/'):
 def open_temporary_file(path):
     return TemporaryFileContext(path)
 
+def clear_temporary_dir():
+    rmtree(__TMP_BASE)
+    mkdirs(__TMP_BASE)
+
+
 def __ensure_dir__():
     if not exist(__APP_BASE):
         uos.mkdir(__APP_BASE)
@@ -116,8 +113,4 @@ def __ensure_dir__():
         uos.mkdir(__DATA_BASE)
     if not exist(__TMP_BASE):
         uos.mkdir(__TMP_BASE)
-    else:
-        # re-build tmp dir
-        rmtree(__TMP_BASE)
-        mkdirs(__TMP_BASE)
 __ensure_dir__()

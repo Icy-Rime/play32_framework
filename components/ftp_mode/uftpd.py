@@ -21,8 +21,8 @@ import socket
 import network
 import uos
 import gc
-from time import sleep_ms
-from micropython import alloc_emergency_exception_buf
+from utime import sleep_ms
+from micropython import alloc_emergency_exception_buf, const
 
 def localtime(sec=None):
     from time import localtime as ltime

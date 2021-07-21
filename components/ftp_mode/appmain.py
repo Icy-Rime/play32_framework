@@ -45,6 +45,10 @@ def main(app_name, *args, **kws):
             event_type, key = keypad.parse_key_event(event)
             if event_type == keypad.EVENT_KEY_PRESS:
                 if key == keypad.KEY_B:
+                    uftpd.stop()
+                    wlan.disconnect()
+                    wlan.active(False)
+                    ap.active(False)
                     _loop = False # exit
         if wlan.isconnected() != wlan_connected:
             wlan_connected = wlan.isconnected()

@@ -100,6 +100,13 @@ def render_battery_level():
     frame.fill_rect(offset_x_clear, 0, width_clear, FNT_H, 0)
     FONT_8.draw_on_frame(battery_level, frame, offset_x_battery_level, 0, COLOR_WHITE)
 
+def render_loading():
+    frame = screen.get_framebuffer()
+    frame.fill(0)
+    width_text = FNT_W * len("loading")
+    FONT_8.draw_on_frame("loading", frame, (SCR_W - width_text) // 2, (SCR_H - FNT_H) // 2, COLOR_WHITE)
+    screen.refresh()
+
 def run_app():
     if app_pointer < 0:
         return
@@ -113,6 +120,7 @@ def run_app():
     frame.blit(display_icon, offset_x_icon, offset_y_icon)
     screen.refresh()
     # reset and run
+    app.disable_boot_image()
     app.reset_and_run_app(app_name)
 
 def main_loop():
@@ -144,11 +152,18 @@ def main_loop():
                         render_battery_level()
                     should_refresh_screen = True
                 if key == KEY_A:
-                    run_app()
+                    with cpu.cpu_speed_context(cpu.FAST):
+                        run_app()
                 if key == KEY_B:
                     # entering setup mode
-                    app.call_component("ftp_mode")
-                    app.reset_and_run_app("") # reset
+                    with cpu.cpu_speed_context(cpu.FAST):
+                        render_loading()
+                        app.call_component("ftp_mode")
+                        render_point_app()
+                        render_battery_level()
+                        import gc
+                        gc.collect()
+                        # app.reset_and_run_app("") # reset
         if ticks_diff(ticks_ms(), t_update_battery_ms) >= 5000:
             t_update_battery_ms = ticks_add(t_update_battery_ms, 5000)
             with cpu.cpu_speed_context(cpu.FAST):
