@@ -1,6 +1,7 @@
 
-from machine import Pin
+from machine import Pin, DEEPSLEEP, SLEEP
 from play32hw.hw_config import PIN_KEY_A, PIN_KEY_B, PIN_KEY_UP, PIN_KEY_DOWN, PIN_KEY_LEFT, PIN_KEY_RIGHT
+import esp32
 
 KEY_A = 0x00
 KEY_B = 0x01
@@ -62,3 +63,21 @@ def parse_key_event(event):
 
 def is_key_pressed(key):
     return get_key_value(key) == 0
+
+def clear_key_status(keys):
+    for k in keys:
+        __key_status[k] = False
+
+def enable_wake_on_press0(key=None):
+    if key != None:
+        pin = __keypad[key]
+    else:
+        pin = None
+    esp32.wake_on_ext0(pin, esp32.WAKEUP_ALL_LOW)
+
+def enable_wake_on_press1(keys=None):
+    if keys != None:
+        pins = [__keypad[i] for i in keys]
+    else:
+        pins = None
+    esp32.wake_on_ext1(pins, esp32.WAKEUP_ALL_LOW)

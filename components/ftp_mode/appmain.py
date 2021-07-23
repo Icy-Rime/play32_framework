@@ -6,6 +6,8 @@ import ftp_thread as ftp, utime
 COLOR_WHITE = framebuf_helper.get_white_color(screen.get_format())
 
 def main(app_name, *args, **kws):
+    screen.init()
+    keypad.init()
     network_helper.deactive_all()
     screen.get_framebuffer().fill(0)
     screen.get_framebuffer().text("FTP MODE", 0, 0, COLOR_WHITE)

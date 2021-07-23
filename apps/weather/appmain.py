@@ -58,6 +58,7 @@ def encode_xin_zhi_weather_url_v3(public_key, private_key, api_path, pdict, ttl=
     return "https://api.seniverse.com/v3/" + api_path + "?" + params
 
 def main(app_name, *args, **kws):
+    hal_keypad.init()
     print("================")
     print('you are running {:}'.format(app_name))
     print(args)

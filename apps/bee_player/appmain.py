@@ -16,6 +16,9 @@ current_playing = -1
 
 def main(app_name, *args, **kws):
     global bee, app_path, sounds_path, current_playing
+    hal_screen.init()
+    hal_keypad.init()
+    hal_buzz.init()
     app_path = path.get_app_path(app_name)
     if bee == None:
         sounds_path = path.join(app_path, "sounds")

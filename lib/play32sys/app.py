@@ -32,21 +32,25 @@ def __save_dict():
         usys.print_exception(e)
 
 # system function
-def _on_boot_(debug=False):
+def _on_boot_(debug=False, app_name=None, *app_args, **app_kws):
     __init_dict()
     # >>>> init screen <<<<
     import hal_screen
     hal_screen.init()
     render_boot_image()
     # >>>> init <<<<
-    import hal_keypad, hal_buzz, hal_led, hal_battery
-    hal_keypad.init()
-    hal_buzz.init()
-    hal_led.init()
-    hal_battery.init()
+    # init what you need.
+    # import hal_keypad, hal_buzz, hal_led, hal_battery
+    # hal_keypad.init()
+    # hal_buzz.init()
+    # hal_led.init()
+    # hal_battery.init()
     # >>>> start <<<<
     usys.path[:] = ['', 'lib', '/', '/lib']
-    boot_app, args, kws = get_boot_app()
+    if app_name != None:
+        boot_app, args, kws = app_name, app_args, app_kws
+    else:
+        boot_app, args, kws = get_boot_app()
     clear_boot_app()
     clear_boot_image()
     clear_temporary_dir()
@@ -165,6 +169,9 @@ def free():
     gc.collect()
     # print('Mem Remain:', gc.mem_free(), 'Bytes')
     return gc.mem_free()
+
+def has_big_memory():
+    return gc.threshold() >= 1048576
 
 def timed_function(f, *args, **kwargs):
     try:

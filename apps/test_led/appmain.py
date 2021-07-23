@@ -11,6 +11,9 @@ hold_timer = 0
 point = 0
 
 def main(app_name, *args, **kws):
+    hal_screen.init()
+    hal_keypad.init()
+    hal_led.init()
     render()
     main_loop()
 

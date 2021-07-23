@@ -20,20 +20,24 @@ class RTCMemory():
     def __getitem__(self, key):
         offset = self.__ofs
         if isinstance(key, int):
+            assert key >= 0 and key < self.__s
             return machine.mem8[offset + key]
         elif isinstance(key, slice):
             d = bytearray()
             for i in range(*key.indices(self.__s)):
                 d.append(machine.mem8[offset + i])
             return d
-        return None
+        raise ValueError(type(key))
     
     def __setitem__(self, key, value):
         offset = self.__ofs
         if isinstance(key, int):
+            assert key >= 0 and key < self.__s
             machine.mem8[offset + key] = value
         elif isinstance(key, slice):
             count = 0
             for i in range(*key.indices(self.__s)):
                 machine.mem8[offset + i] = value[count]
                 count += 1
+        else:
+            raise ValueError(type(key))

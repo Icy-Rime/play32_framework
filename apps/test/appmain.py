@@ -11,6 +11,8 @@ console = framebuf_console.Console(
 )
 
 def main(app_name, *args, **kws):
+    hal_screen.init()
+    hal_keypad.init()
     print("================")
     console.log("================")
     print('you are running {:}'.format(app_name))

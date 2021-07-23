@@ -1,4 +1,4 @@
-import hal_screen, hal_keypad, hal_battery, usys
+import hal_screen, hal_keypad, hal_battery
 from graphic import framebuf_helper
 from machine import freq
 from play32sys import app, path, network_helper, battery
@@ -20,6 +20,9 @@ top_battery_level = 0
 
 def main(app_name, *args, **kws):
     global last_log, record_path
+    hal_screen.init()
+    hal_keypad.init()
+    hal_battery.init()
     # init log
     for _ in range(1024):
         last_log.append(hal_battery.get_raw_battery_value())

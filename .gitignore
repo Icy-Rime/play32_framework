@@ -5,3 +5,9 @@
 !.vscode/extensions.json
 __pycache__
 .build
+data/**
+!data/hw_config.json
+!data/hw_config(ssd1351).json
+!data/sys_config.json
+!data/battery.dat
+tmp/**

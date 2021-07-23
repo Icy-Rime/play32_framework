@@ -16,7 +16,6 @@ def _draw_char_one_by_one(frame, text, x:int, y:int, color, width_limit:int, hei
     moved_y:int = y
     count:int = 0
     for char in text:
-        count += 1
         # get unicode and char pos
         u8d = char.encode('utf-8')
         l:int = int(len(u8d))
@@ -42,6 +41,7 @@ def _draw_char_one_by_one(frame, text, x:int, y:int, color, width_limit:int, hei
             moved_x = x
         if height_limit > 0 and (moved_y + font_height - y > height_limit):
             return count
+        count += 1
         if unicode == ASCII_T or unicode == ASCII_N or unicode == ASCII_R:
             continue
         # draw
@@ -82,6 +82,44 @@ def get_text_line(text, width_limit:int, size:int) -> int:
             continue
         moved_x += size
     return lines
+
+@micropython.viper
+def get_text_count(text, width_limit:int, height_limit:int, font_width:int, font_height:int) -> int:
+    moved_x:int = 0
+    moved_y:int = 0
+    count:int = 0
+    for char in text:
+        # get unicode and char pos
+        u8d = char.encode('utf-8')
+        l:int = int(len(u8d))
+        u8:ptr8 = ptr8(u8d)
+        unicode:int = 0x00
+        if l == 1:
+            unicode = unicode + u8[0]
+        else:
+            pat:int = 0xFF >> (l+1)
+            unicode = unicode | (u8[0] & pat)
+            for i in range(1, l):
+                unicode = unicode << 6
+                unicode = unicode | (u8[i] & 0x3F)
+        # process special character
+        if unicode == ASCII_T:
+            char_count = moved_x // font_width
+            lack_of_char = (TAB_SIZE - (char_count % TAB_SIZE)) % TAB_SIZE
+            moved_x += font_width * lack_of_char
+        elif unicode == ASCII_R:
+            moved_x = 0
+        elif unicode == ASCII_N or (width_limit > 0 and moved_x + font_width > width_limit):
+            moved_y += font_height
+            moved_x = 0
+        if height_limit > 0 and (moved_y + font_height > height_limit):
+            return count
+        count += 1
+        if unicode == ASCII_T or unicode == ASCII_N or unicode == ASCII_R:
+            continue
+        # draw
+        moved_x += font_width
+    return count
 
 class FontDraw():
     def get_font_size(self) -> tuple:

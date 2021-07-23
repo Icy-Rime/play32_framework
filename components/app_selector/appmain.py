@@ -4,6 +4,7 @@ from play32hw import cpu
 import framebuf, ujson, uos
 import hal_screen as screen
 import hal_keypad as keypad
+import hal_battery
 from resource.font import get_font_8px
 from utime import ticks_ms, ticks_diff, ticks_add
 FONT_8 = get_font_8px()
@@ -25,6 +26,9 @@ def main(app_name, *args, **kws):
     # init
     global THIS_APP_NAME
     THIS_APP_NAME = app_name
+    screen.init()
+    keypad.init()
+    hal_battery.init()
     init()
     render_point_app()
     # loop forever

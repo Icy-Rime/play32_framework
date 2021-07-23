@@ -1,12 +1,13 @@
 # >>>> config memory <<<<
 import gc
-_threshold = (gc.mem_free() * 80) // 100 # 80% gc auto collect
+_threshold = (gc.mem_free() * 60) // 100 # 80% gc auto collect
 gc.threshold(_threshold)
 print("gc threshold has been set to", _threshold)
 del _threshold
 # >>>> main <<<<
 from play32sys import app
 app._on_boot_(True)
+# app._on_boot_(True, "txt_reader")
 
 # test below
 # from play32sys import network_helper
