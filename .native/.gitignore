@@ -1,0 +1,5 @@
+/font/**
+!/font/make_font_dinkie_8x8.py
+!/font/make_font_guanzhi_8x8.py
+!/font/make_font_unifont_16x16.py
+!/font/README.md

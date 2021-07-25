@@ -12,6 +12,8 @@ CPU_CONTEXT_SLOW = cpu.cpu_speed_context(cpu.FAST)
 # const
 STATUS_MENU = const(0)
 STATUS_READER = const(1)
+SIZE_READ_PAGE = const(8)
+SIZE_COMMIT_AFTER_FLIP = const(16)
 
 # status
 status = STATUS_MENU
@@ -23,8 +25,8 @@ def main(app_name, *args, **kws):
     hal_screen.init()
     hal_keypad.init()
     hal_battery.init()
-    reader = book_reader.BookReader()
-    book_ui.render_loading("加载书签")
+    reader = book_reader.BookReader(SIZE_COMMIT_AFTER_FLIP)
+    book_ui.render_message("加载书签")
     # 加载文件
     data_dir = path.get_data_path(app_name)
     if not path.exist(data_dir):
@@ -35,7 +37,7 @@ def main(app_name, *args, **kws):
         if f_name.endswith(".txt") or f_name.endswith(".TXT"):
             txt_file_path = path.join(data_dir, f_name)
     if txt_file_path == None:
-        book_ui.render_loading("找不到文本文件")
+        book_ui.render_message("找不到文本文件")
         return
     reader.load_book(txt_file_path)
     # 进入主循环
@@ -63,13 +65,14 @@ def main_loop():
                             reader.flip_page_by(page_offset)
                             reader.render()
                     elif key == hal_keypad.KEY_A:
-                        book_ui.render_status(battery.get_battery_level(), reader.bookmark_load_progress)
+                        reader.commit_bookmark_page()
+                        book_ui.render_status(battery.get_battery_level(), reader)
                         lightsleep(1000)
                         reader.render()
                     hal_keypad.clear_key_status([key])
             if (reader != None) and (not reader.bookmark_loaded):
                 with CPU_CONTEXT_FAST:
-                    reader.load_bookmark(8)
+                    reader.load_bookmark(SIZE_READ_PAGE)
             else:
                 lightsleep(50)
             battery.measure()

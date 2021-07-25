@@ -2,7 +2,7 @@ from play32sys import app
 from graphic import framebuf_helper, ubmfont, bmfont
 from resource import font
 from book import Book, Bookmark, get_text_utf8_length
-import hal_screen, hal_keypad, gc
+import hal_screen, gc
 
 BUFFER_SIZE = 4096 if app.has_big_memory() else 512
 WHITE = framebuf_helper.get_white_color(hal_screen.get_format())
@@ -10,13 +10,19 @@ SCR_W, SCR_H = hal_screen.get_size()
 FNT: ubmfont.FontDrawUnicode = font.get_font_16px()
 FNT_W, FNT_H = FNT.get_font_size()
 
+def gc_collect_small_memory():
+    if not app.has_big_memory():
+        gc.collect()
+
 class BookReader():
-    def __init__(self):
+    def __init__(self, commit_after_flip=1):
         self.bookmark = None
         self.bookmark_pos = 0
         self.bookmark_size = 0
         self.book = None
         self.book_size = 0
+        self.__commit_after_flip = commit_after_flip
+        self.__flipped = 0
     
     @property
     def book_loaded(self):
@@ -30,6 +36,14 @@ class BookReader():
     def bookmark_load_progress(self):
         return self.bookmark_size / self.book_size
 
+    @property
+    def bookmark_current_page(self):
+        return self.bookmark.marked_page
+    
+    @property
+    def bookmark_total_page(self):
+        return len(self.bookmark)
+
     def flip_page_by(self, page_offset):
         bmk = self.bookmark
         old_page = bmk.marked_page
@@ -40,7 +54,18 @@ class BookReader():
             else:
                 offset =  - bmk.get_page_offset_fast(new_page, old_page, BUFFER_SIZE//2)
             self.bookmark_pos += offset
-            bmk.update_marked_page(new_page)
+            self.__flipped += 1
+            if self.__flipped >= self.__commit_after_flip:
+                bmk.update_marked_page(new_page, True)
+                self.__flipped = 0
+                gc.collect()
+            else:
+                bmk.update_marked_page(new_page, False)
+                gc_collect_small_memory()
+    
+    def commit_bookmark_page(self):
+        bmk = self.bookmark
+        bmk.update_marked_page(bmk.marked_page, True)
 
     def load_book(self, txt_file_path):
         bmk = Bookmark(txt_file_path+'.bmk')
@@ -49,6 +74,8 @@ class BookReader():
         self.bookmark_size = self.bookmark_pos + bmk.get_page_offset_fast(bmk.marked_page, len(bmk), BUFFER_SIZE)
         self.book = Book(txt_file_path, BUFFER_SIZE, self.bookmark_pos)
         self.book_size = len(self.book)
+        self.__flipped = 0
+        gc_collect_small_memory()
 
     def load_bookmark(self, max_pages=-1):
         if self.bookmark == None:
@@ -66,10 +93,11 @@ class BookReader():
                 page_list.append(txt_bytes_size)
                 book.seek_by(txt_bytes_size)
                 max_pages -= 1
+                gc_collect_small_memory()
             self.bookmark.append_pages(page_list)
             self.bookmark_size += sum(page_list)
-        if not app.has_big_memory():
-            gc.collect()
+            del page_list
+        gc.collect()
         return self.bookmark_size == self.book_size # return if finished
     
     def render(self):

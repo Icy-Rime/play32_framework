@@ -46,7 +46,7 @@ def mount(access_id, access_key, host, port=12588, mount_path="/mnt"):
     assert len(access_id) == 8
     aes_key, aes_iv = generate_aes_key_and_iv(access_key)
     def inject_custom_param(data, mp_size, cp_size, bd_size):
-        if bd_size < 0 or cp_size < 48:
+        if len(data) < mp_size+cp_size or cp_size < 48:
             return PREFIX_NFS + data
         m_param = data[0:mp_size]
         c_param = data[mp_size:mp_size+cp_size]

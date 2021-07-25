@@ -7,7 +7,7 @@ SCR_W, SCR_H = hal_screen.get_size()
 FNT: ubmfont.FontDrawUnicode = font.get_font_16px()
 FNT_W, FNT_H = FNT.get_font_size()
 
-def render_loading(msg="加载中", process=0.0):
+def render_message(msg="加载中", process=0.0):
     frame = hal_screen.get_framebuffer()
     frame.fill(0)
     # prograss bar 7px
@@ -21,13 +21,14 @@ def render_loading(msg="加载中", process=0.0):
     FNT.draw_on_frame(msg, frame, t_offset, 8, WHITE, SCR_W, SCR_H-8)
     hal_screen.refresh()
 
-def render_status(battery, load_progress):
+def render_status(battery, reader):
     frame = hal_screen.get_framebuffer()
     frame.fill(0)
     FNT.draw_on_frame("电量:{}%".format(battery), frame, 0, 0, WHITE, SCR_W, FNT_H)
-    if load_progress < 1.0:
+    if not reader.bookmark_loaded:
         FNT.draw_on_frame("加载进度:", frame, 0, FNT_H, WHITE, SCR_W, FNT_H)
-        FNT.draw_on_frame("{:.3f}%".format(load_progress * 100), frame, 0, FNT_H * 2, WHITE, SCR_W, FNT_H)
+        FNT.draw_on_frame("{:.3f}%".format(reader.bookmark_load_progress * 100), frame, 0, FNT_H * 2, WHITE, SCR_W, FNT_H)
     else:
-        FNT.draw_on_frame("已加载完成", frame, 0, FNT_H, WHITE, SCR_W, FNT_H)
+        FNT.draw_on_frame("第{}页".format(reader.bookmark_current_page), frame, 0, FNT_H, WHITE, SCR_W, FNT_H)
+        FNT.draw_on_frame("共{}页".format(reader.bookmark_total_page), frame, 0, FNT_H * 2, WHITE, SCR_W, FNT_H)
     hal_screen.refresh()

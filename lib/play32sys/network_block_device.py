@@ -20,8 +20,9 @@ CMD_GET_INFO = const(0x02)
 CMD_GET_SERVER_INFO = const(0x03)
 CMD_PING = const(0xFF)
 class ProtocolUDP:
-    def __init__(self, host, port=12588, inject_custom_param=None, retry=3, timeout_ms=500):
+    def __init__(self, host, port=12588, inject_custom_param=None, unpack_custom_response=None, retry=3, timeout_ms=500):
         self.inject_custom_param = inject_custom_param
+        self.unpack_custom_response = unpack_custom_response
         udp = usocket.socket(usocket.AF_INET, usocket.SOCK_DGRAM)
         udp.settimeout(timeout_ms/1000)
         address = usocket.getaddrinfo(host, port)[0][-1]
@@ -57,8 +58,12 @@ class ProtocolUDP:
     
     def __inject_custom_param(self, data):
         if self.inject_custom_param != None:
-            block_data_size = len(data) - self.custom_param_size - self.custom_param_offset
-            return self.inject_custom_param(data, self.custom_param_offset, self.custom_param_size, block_data_size)
+            return self.inject_custom_param(data, self.custom_param_offset, self.custom_param_size, self.block_size)
+        return data
+    
+    def __unpack_custom_response(self, data):
+        if self.unpack_custom_response != None:
+            return self.unpack_custom_response(data, self.custom_param_offset, self.custom_param_size, self.block_size)
         return data
 
     def get_info(self):
@@ -78,6 +83,7 @@ class ProtocolUDP:
                 req = self.__inject_custom_param(req)
                 self.udp.sendto(req, self.address)
                 data = self.udp.recv(self.packet_size)
+                data = self.__unpack_custom_response(data)
                 if data[0] == CODE_SUCCESS and data[1] == id:
                     return data[self.param_size:self.packet_size]
             except: pass
@@ -99,6 +105,7 @@ class ProtocolUDP:
                 req = self.__inject_custom_param(req)
                 self.udp.sendto(req, self.address)
                 data = self.udp.recv(self.packet_size)
+                data = self.__unpack_custom_response(data)
                 if data[0] == CODE_SUCCESS and data[1] == id:
                     return
             except: pass

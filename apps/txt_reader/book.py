@@ -83,12 +83,13 @@ class Bookmark():
             del byts, fmt_str, sizes
         return count
 
-    def update_marked_page(self, page):
+    def update_marked_page(self, page, commit = True):
         self.__page = page
-        f = self.__file
-        f.seek(0, 0) # seek to start
-        f.write(int.to_bytes(page, 4, 'big'))
-        f.flush()
+        if commit:
+            f = self.__file
+            f.seek(0, 0) # seek to start
+            f.write(int.to_bytes(page, 4, 'big'))
+            f.flush()
     
     def append_page(self, size):
         f = self.__file
