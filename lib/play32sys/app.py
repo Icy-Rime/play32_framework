@@ -144,11 +144,14 @@ def run_app(app_name, *args, **kws):
     curr = uos.getcwd()
     uos.chdir(get_app_path(app_name))
     try:
-        module = __import__("appmain")
         if "appmain" in usys.modules:
             del usys.modules["appmain"]
-        return module.main(app_name, *args, **kws)
+        module = __import__("appmain")
+        res = module.main(app_name, *args, **kws)
+        return res
     finally:
+        if "appmain" in usys.modules:
+            del usys.modules["appmain"]
         uos.chdir(curr)
         gc.collect()
 
@@ -156,11 +159,14 @@ def call_component(component_name, *args, **kws):
     curr = uos.getcwd()
     uos.chdir(get_component_path(component_name))
     try:
-        module = __import__("appmain")
         if "appmain" in usys.modules:
             del usys.modules["appmain"]
-        return module.main(component_name, *args, **kws)
+        module = __import__("appmain")
+        res = module.main(component_name, *args, **kws)
+        return res
     finally:
+        if "appmain" in usys.modules:
+            del usys.modules["appmain"]
         uos.chdir(curr)
         gc.collect()
 

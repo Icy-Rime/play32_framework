@@ -4,7 +4,7 @@ from play32hw import cpu
 import framebuf, ujson, uos
 import hal_screen as screen
 import hal_keypad as keypad
-import hal_battery
+import hal_battery, hal_sdcard
 from resource.font import get_font_8px
 from utime import ticks_ms, ticks_diff, ticks_add
 FONT_8 = get_font_8px()
@@ -162,6 +162,8 @@ def main_loop():
                     # entering setup mode
                     with cpu.cpu_speed_context(cpu.FAST):
                         render_loading()
+                        hal_sdcard.init()
+                        hal_sdcard.mount()
                         app.call_component("ftp_mode")
                         render_point_app()
                         render_battery_level()
