@@ -63,7 +63,9 @@ def main(app_name, *args, **kws):
             screen.get_framebuffer().text("Exiting...", 0, 16, COLOR_WHITE)
             screen.refresh()
             utime.sleep_ms(2000)
-            return
+            ftp.deinit()
+            wlan.disconnect()
+            _loop = False # exit
         if wlan.isconnected() != wlan_connected:
             wlan_connected = wlan.isconnected()
             start()
