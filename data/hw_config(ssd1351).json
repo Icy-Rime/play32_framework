@@ -16,5 +16,9 @@
     "pin_screen_rst": 27,
     "pin_led": 27,
     "pin_battery": 36,
+    "pin_sd_cs": 22,
+    "pin_sd_sck": 23,
+    "pin_sd_miso": 25,
+    "pin_sd_mosi": 26,
     "version": 1
 }

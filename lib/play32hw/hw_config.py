@@ -21,4 +21,8 @@ PIN_KEY_RIGHT = __json["pin_key_right"]
 PIN_BUZZ = __json["pin_buzz"]
 PIN_LED = __json["pin_led"]
 PIN_BATTERY = __json["pin_battery"]
+PIN_SD_CS = __json["pin_sd_cs"]
+PIN_SD_SCK = __json["pin_sd_sck"]
+PIN_SD_MISO = __json["pin_sd_miso"]
+PIN_SD_MOSI = __json["pin_sd_mosi"]
 del __p, __json
