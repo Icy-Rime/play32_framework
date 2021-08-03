@@ -138,8 +138,8 @@ def update_framework():
 
 def _on_enter_recovery_mode_():
     try:
-        update_framework()
-        machine.reset()
+        if update_framework():
+            machine.reset()
     except Exception as e:
         usys.print_exception(e)
     start_ftp()
