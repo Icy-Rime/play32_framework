@@ -52,7 +52,7 @@ for dirpath, dirnames, filenames in os.walk(dist_path, topdown=True):
 
 with open(output_path, "wb") as f:
     f.write(pack_stream.getvalue())
-    print("Packet Size:", f.tell())
+    packet_size = f.tell()
 
 hasher = sha256()
 with open(output_path, "rb") as f:
@@ -82,11 +82,11 @@ def __process_next_file_entry(dio, verbose=False):
             print("FILE: {} SIZE: {}".format(file_name, file_content_length))
         dio.read(file_content_length)
     return True
-
 def unpack_update_packet(verbose=False):
     with open(output_path, "rb") as f:
         flag = __process_next_file_entry(f, verbose)
         while flag:
             flag = __process_next_file_entry(f, verbose)
-
 unpack_update_packet(True)
+
+print("Packet Size:", packet_size)
