@@ -12,6 +12,8 @@ ASCII_R = const(13)
 # UNIVERSAL
 @micropython.viper
 def _draw_char_one_by_one(frame, text, x:int, y:int, color, width_limit:int, height_limit:int, font_width:int, font_height:int, draw_char_on) -> int:
+    if (width_limit > 0 and width_limit < font_width) or (height_limit > 0 and height_limit < font_height):
+        return 0
     moved_x:int = x
     moved_y:int = y
     count:int = 0
@@ -57,6 +59,8 @@ def _draw_char_one_by_one(frame, text, x:int, y:int, color, width_limit:int, hei
 
 @micropython.viper
 def get_text_line(text, width_limit:int, size:int) -> int:
+    if width_limit < size:
+        return 0
     # unicode also ok!
     moved_x:int = 0
     lines:int = 1
@@ -98,6 +102,8 @@ def get_text_line(text, width_limit:int, size:int) -> int:
 
 @micropython.viper
 def get_text_count(text, width_limit:int, height_limit:int, font_width:int, font_height:int) -> int:
+    if (width_limit > 0 and width_limit < font_width) or (height_limit > 0 and height_limit < font_height):
+        return 0
     moved_x:int = 0
     moved_y:int = 0
     count:int = 0

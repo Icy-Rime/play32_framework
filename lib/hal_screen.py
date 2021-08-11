@@ -43,6 +43,9 @@ def refresh(x=0, y=0, w=SCREEN_WIDTH, h=SCREEN_HEIGHT):
         context = x
         effect_area = y
     if SCREEN_DRIVER == "ssd1306":
-        __screen.show()
+        if w * 100 >= SCREEN_WIDTH * 75 and h * 100 >= SCREEN_HEIGHT * 75:
+            __screen.show()
+        else:
+            __screen.refresh(x, y, w, h)
     elif SCREEN_DRIVER == "ssd1351":
         __screen.refresh(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, __buffer)
