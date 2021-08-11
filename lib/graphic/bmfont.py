@@ -15,20 +15,26 @@ def _draw_char_one_by_one(frame, text, x:int, y:int, color, width_limit:int, hei
     moved_x:int = x
     moved_y:int = y
     count:int = 0
-    for char in text:
-        # get unicode and char pos
-        u8d = char.encode('utf-8')
-        l:int = int(len(u8d))
-        u8:ptr8 = ptr8(u8d)
-        unicode:int = 0x00
-        if l == 1:
-            unicode = unicode + u8[0]
+    u8d = text.encode('utf-8')
+    length:int = int(len(u8d))
+    string:ptr8 = ptr8(u8d)
+    tpoint: int = 0
+    while tpoint < length:
+        # get unicode char
+        lead:int = string[tpoint]
+        tpoint += 1
+        u8size:int = 0
+        unicode:int = 0
+        while tpoint < length and (string[tpoint] & 0b11_000000) == 0b10_000000:
+            unicode = unicode << 6
+            unicode = unicode | (string[tpoint] & 0b00_111111)
+            tpoint += 1
+            u8size += 1
+        if u8size == 0:
+            unicode = lead
         else:
-            pat:int = 0xFF >> (l+1)
-            unicode = unicode | (u8[0] & pat)
-            for i in range(1, l):
-                unicode = unicode << 6
-                unicode = unicode | (u8[i] & 0x3F)
+            lead = (0b00111111 >> u8size) & lead
+            unicode = unicode | (lead << (u8size * 6))
         # process special character
         if unicode == ASCII_T:
             char_count = (moved_x - x) // font_width
@@ -54,20 +60,27 @@ def get_text_line(text, width_limit:int, size:int) -> int:
     # unicode also ok!
     moved_x:int = 0
     lines:int = 1
-    for char in text:
-        # get unicode and char pos
-        u8d = char.encode('utf-8')
-        l:int = int(len(u8d))
-        u8:ptr8 = ptr8(u8d)
-        unicode:int = 0x00
-        if l == 1:
-            unicode = unicode + u8[0]
+    u8d = text.encode('utf-8')
+    length:int = int(len(u8d))
+    string:ptr8 = ptr8(u8d)
+    tpoint: int = 0
+    while tpoint < length:
+        # get unicode char
+        lead:int = string[tpoint]
+        tpoint += 1
+        u8size:int = 0
+        unicode:int = 0
+        while tpoint < length and (string[tpoint] & 0b11_000000) == 0b10_000000:
+            unicode = unicode << 6
+            unicode = unicode | (string[tpoint] & 0b00_111111)
+            tpoint += 1
+            u8size += 1
+        if u8size == 0:
+            unicode = lead
         else:
-            pat:int = 0xFF >> (l+1)
-            unicode = unicode | (u8[0] & pat)
-            for i in range(1, l):
-                unicode = unicode << 6
-                unicode = unicode | (u8[i] & 0x3F)
+            lead = (0b00111111 >> u8size) & lead
+            unicode = unicode | (lead << (u8size * 6))
+        # process special character
         if unicode == ASCII_T:
             char_count = moved_x // size
             lack_of_char = TAB_SIZE - char_count % TAB_SIZE
@@ -88,20 +101,26 @@ def get_text_count(text, width_limit:int, height_limit:int, font_width:int, font
     moved_x:int = 0
     moved_y:int = 0
     count:int = 0
-    for char in text:
-        # get unicode and char pos
-        u8d = char.encode('utf-8')
-        l:int = int(len(u8d))
-        u8:ptr8 = ptr8(u8d)
-        unicode:int = 0x00
-        if l == 1:
-            unicode = unicode + u8[0]
+    u8d = text.encode('utf-8')
+    length:int = int(len(u8d))
+    string:ptr8 = ptr8(u8d)
+    tpoint: int = 0
+    while tpoint < length:
+        # get unicode char
+        lead:int = string[tpoint]
+        tpoint += 1
+        u8size:int = 0
+        unicode:int = 0
+        while tpoint < length and (string[tpoint] & 0b11_000000) == 0b10_000000:
+            unicode = unicode << 6
+            unicode = unicode | (string[tpoint] & 0b00_111111)
+            tpoint += 1
+            u8size += 1
+        if u8size == 0:
+            unicode = lead
         else:
-            pat:int = 0xFF >> (l+1)
-            unicode = unicode | (u8[0] & pat)
-            for i in range(1, l):
-                unicode = unicode << 6
-                unicode = unicode | (u8[i] & 0x3F)
+            lead = (0b00111111 >> u8size) & lead
+            unicode = unicode | (lead << (u8size * 6))
         # process special character
         if unicode == ASCII_T:
             char_count = moved_x // font_width
