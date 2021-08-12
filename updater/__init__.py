@@ -83,7 +83,7 @@ def check_update_file():
 
 def clear_root_dir():
     for file in uos.listdir("/"):
-        if file not in ["updater", "data", "tmp", "apps", "boot.py", "main.py"]:
+        if file not in ["updater", "resource", "data", "tmp", "apps", "boot.py", "main.py"]:
             path.rmtree(path.join("/", file))
 
 def __process_next_file_entry(dio, verbose=False):

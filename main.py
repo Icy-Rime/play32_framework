@@ -1,6 +1,6 @@
 # >>>> config memory <<<<
 import gc
-_threshold = (gc.mem_free() * 60) // 100 # 80% gc auto collect
+_threshold = (gc.mem_free() * 60) // 100 # 60% gc auto collect
 gc.threshold(_threshold)
 print("gc threshold has been set to", _threshold)
 del _threshold
@@ -24,6 +24,7 @@ try:
     else:
         from play32sys import app
         app._on_boot_(True)
+        pass
 except Exception as e:
     usys.print_exception(e)
     import updater

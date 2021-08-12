@@ -1,8 +1,8 @@
 import sys, os, subprocess, shutil
 
 current_path = os.path.abspath(os.path.dirname(__file__))
-source_dir = os.path.join(current_path, "ubmfont_mixin")
-output_path = os.path.join(current_path, "ubmfont_mixin", "ubmfont.mpy")
+source_dir = os.path.join(current_path, "ubmfont_mixin_example")
+output_path = os.path.join(current_path, "ubmfont_mixin_example", "ubmfont.mpy")
 lib_path = os.path.join(current_path, "..", "lib", "ubmfont.mpy")
 
 os.chdir(source_dir)

@@ -28,7 +28,7 @@ def main():
     # make fnt
     try:
         backup_font_path = os.path.join(current_path, "SourceHanSansSC-VF.ttf")
-        backup_fnt = ImageFont.truetype(backup_font_path, size=font_size-2)
+        backup_fnt = ImageFont.truetype(backup_font_path, size=font_size)
         def should_ignore(char, buffer):
             frame = framebuf.FrameBuffer(buffer, block_width, block_height, framebuf.MONO_HLSB)
             filled = 0
@@ -44,7 +44,14 @@ def main():
             byts = char_str.encode("utf8")
             if len(byts) == 1 and byts[0] >= 0x20 and byts[0] <= 0x7E:
                 # ascii use a different font
-                position_offset = (0, -2)
+                if char_str in "/{[]}:;\\":
+                    position_offset = (0, -3)
+                elif char_str in "@Q":
+                    position_offset = (0, -4)
+                elif char_str in "gpqy":
+                    position_offset = (0, -6)
+                else:
+                    position_offset = (0, -2)
                 return _get_char_data(char_str, block_w, block_h, backup_fnt, position_offset, invert)
             return _get_char_data(char_str, block_w, block_h, fnt, position_offset, invert)
         make_unicode_font(
