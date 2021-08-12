@@ -38,24 +38,29 @@ def box_padding(box, top=0, right=0, bottom=0, left=0):
     h = 0 if h < 0 else h
     return (x, y, w, h)
 
-def box_max_text(box_area, font_size):
+def box_max_text(box_area, font_size, align_horizontal=ALIGN_CENTER, align_vertical=ALIGN_CENTER):
     font_w, font_h = font_size
     w, h = box_area[2:4]
     aw = w - (w % font_w)
     ah = h - (h % font_h)
-    return box_align((0, 0, aw, ah), box_area, ALIGN_CENTER, ALIGN_CENTER)
+    return box_align((0, 0, aw, ah), box_area, align_horizontal, align_vertical)
 
-def box_center_text(text, box_area, font_size):
+def box_align_text(text, box_area, font_size, multi_lines=True, align_horizontal=ALIGN_CENTER, align_vertical=ALIGN_CENTER):
     font_w, font_h = font_size
     area_w, area_h = box_area[2:4]
-    lines = get_text_line(text, area_w, font_w)
-    tw = area_w - (area_w % font_w) if lines > 1 else len(text) * font_w
-    th = lines * font_h
+    if multi_lines:
+        lines = get_text_line(text, area_w, font_w)
+        tw = area_w - (area_w % font_w) if lines > 1 else len(text) * font_w
+        th = lines * font_h
+    else:
+        text_width = len(text) * font_w
+        tw = area_w - (area_w % font_w) if text_width > area_w else text_width
+        th = font_h
     if th > area_h:
-        return box_max_text(box_area, font_size)
-    return box_align((0, 0, tw, th), box_area, ALIGN_CENTER, ALIGN_CENTER)
+        return box_max_text(box_area, font_size, align_horizontal, align_vertical)
+    return box_align((0, 0, tw, th), box_area, align_horizontal, align_vertical)
 
-def box_devide(box, direction=DIRECTION_HORIZONTAL, *weight):
+def box_devide(box, direction, *weight):
     x, y, w, h = box
     lst = []
     summary = sum(weight)

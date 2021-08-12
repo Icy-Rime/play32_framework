@@ -1,5 +1,5 @@
 from graphic.bmfont import FontDrawAscii
-from graphic.layout import box_align, box_max_text, box_padding, box_center_text, ALIGN_CENTER, ALIGN_START
+from graphic.layout import box_align, box_max_text, box_padding, box_align_text, ALIGN_CENTER, ALIGN_START
 from framebuf import FrameBuffer
 from utime import ticks_us, ticks_diff
 
@@ -79,7 +79,7 @@ class Button(Widget):
             fg = color
         tax, tay, taw, tah = box_padding(box, 2, 2, 2, 2)
         frame.fill_rect(tax, tay, taw, tah, bg)
-        tax, tay, taw, tah = box_center_text(label, box, font_size)
+        tax, tay, taw, tah = box_align_text(label, box, font_size, False, ALIGN_CENTER, ALIGN_CENTER)
         font.draw_on_frame(label, frame, tax, tay, fg, taw, tah)
         # draw border
         if self.__pressed:
@@ -98,12 +98,14 @@ class Button(Widget):
         frame.line(x, y+h-1, x+1, y+h-2, bg)
         frame.line(x+w-1, y, x+w-2, y+1, bg)
 
-class CenterText(Widget):
+class Text(Widget):
     def __init__(self):
         super().__init__()
         self.__text = ""
         self.__color = 1
         self.__font = FontDrawAscii()
+        self.__inverted = False
+        self.__align = (ALIGN_CENTER, ALIGN_CENTER)
     
     def set_text(self, value):
         self.__text = value
@@ -113,6 +115,12 @@ class CenterText(Widget):
 
     def set_font(self, value):
         self.__font = value
+    
+    def set_inverted(self, value):
+        self.__inverted = value
+
+    def set_align(self, align_horizontal=ALIGN_CENTER, align_vertical=ALIGN_CENTER):
+        self.__align = (align_horizontal, align_vertical)
 
     def render(self):
         frame = self._frame
@@ -120,10 +128,16 @@ class CenterText(Widget):
         text = self.__text
         font = self.__font
         font_size = font.get_font_size()
+        if self.__inverted:
+            bg = self.__color
+            fg = 0
+        else:
+            bg = 0
+            fg = self.__color
         tax, tay, taw, tah = box_padding(box, 2, 2, 2, 2)
-        frame.fill_rect(tax, tay, taw, tah, 0)
-        tax, tay, taw, tah = box_center_text(text, box, font_size)
-        font.draw_on_frame(text, frame, tax, tay, self.__color, taw, tah)
+        frame.fill_rect(tax, tay, taw, tah, bg)
+        tax, tay, taw, tah = box_align_text(text, box, font_size, False, *self.__align)
+        font.draw_on_frame(text, frame, tax, tay, fg, taw, tah)
 
 class ScrollText(Widget):
     def __init__(self):
@@ -132,16 +146,21 @@ class ScrollText(Widget):
         self.__color = 1
         self.__font = FontDrawAscii()
         self.__speed = 32
+        self.__inverted = False
+        self.__align = (ALIGN_CENTER, ALIGN_CENTER)
         self.__text_offset = 0
         self.__need_scroll = False
         self.__last_update_us = ticks_us()
     
+    def __reset_text_offset(self):
+        self.__text_offset = -self.__font.get_font_size()[0] + 1
+
     def __check_need_scroll(self):
         font_width = self.__font.get_font_size()[0]
         area_width = self._box[2]
         self.__need_scroll = (len(self.__text) * font_width) > area_width
-        self.__text_offset = 0
         self.__last_update_us = ticks_us()
+        self.__reset_text_offset()
 
     def set_text(self, value):
         index = value.find("\n")
@@ -160,23 +179,36 @@ class ScrollText(Widget):
     def set_speed(self, value):
         self.__speed = value
 
+    def set_inverted(self, value):
+        self.__inverted = value
+
+    def set_align(self, align_horizontal=ALIGN_CENTER, align_vertical=ALIGN_CENTER):
+        self.__align = (align_horizontal, align_vertical)
+
     def set_box(self, box):
         super().set_box(box)
         self.__check_need_scroll()
 
     def animation(self):
         if self.__need_scroll:
+            if self.__inverted:
+                bg = self.__color
+                fg = 0
+            else:
+                bg = 0
+                fg = self.__color
             frame = self._frame
             box = self._box
             text = self.__text
             font = self.__font
             font_size = font.get_font_size()
             tax, tay, taw, tah = box
-            frame.fill_rect(tax, tay, taw, tah, 0)
-            tax, tay, taw, tah = box_align( (0, 0, taw, font_size[1]), box, ALIGN_START, ALIGN_CENTER)
+            frame.fill_rect(tax, tay, taw, tah, bg)
+            # tax, tay, taw, tah = box_align( (0, 0, taw, font_size[1]), box, ALIGN_START, ALIGN_CENTER)
             font_width = font_size[0]
             text_area_width = box_max_text(box, font_size)[2]
-            expect_char_count = (text_area_width // font_width) + 1
+            tax, tay, taw, tah = box_align( (0, 0, text_area_width, font_size[1]), box, *self.__align)
+            expect_char_count = (text_area_width // font_width) - 1
             text_char_count = len(text)
             text_width = text_char_count * font_width
             last_us = self.__last_update_us
@@ -184,23 +216,35 @@ class ScrollText(Widget):
             self.__last_update_us = now_us # <-- update
             text_offset = self.__text_offset
             text_offset += self.__speed * ticks_diff(now_us, last_us) / 1_000_000
+            self.__text_offset = text_offset if text_offset < 0 else text_offset % text_width # <-- update
             text_offset = text_offset % text_width
-            self.__text_offset = text_offset # <-- update
             slice_start = int(text_offset // font_width)
             if slice_start + expect_char_count <= text_char_count:
                 slice_text = text[slice_start: slice_start+expect_char_count]
             else:
                 slice_text = text[slice_start: text_char_count] + text[: slice_start+expect_char_count-text_char_count]
-            xoffset = -int(text_offset % font_width)
-            font.draw_on_frame(slice_text, frame, tax+xoffset, tay, self.__color, taw, tah)
+            xoffset = -int(text_offset % font_width) + font_width
+            taw -= font_width
+            font.draw_on_frame(slice_text, frame, tax+xoffset, tay, fg, taw, tah)
     
     def render(self):
+        if self.__inverted:
+            bg = self.__color
+            fg = 0
+        else:
+            bg = 0
+            fg = self.__color
         frame = self._frame
         box = self._box
         text = self.__text
         font = self.__font
         font_size = font.get_font_size()
         tax, tay, taw, tah = box
-        frame.fill_rect(tax, tay, taw, tah, 0)
-        tax, tay, taw, tah = box_align( (0, 0, taw, font_size[1]), box, ALIGN_START, ALIGN_CENTER)
-        font.draw_on_frame(text, frame, tax, tay, self.__color, taw, tah)
+        frame.fill_rect(tax, tay, taw, tah, bg)
+        if self.__need_scroll:
+            text_area_width = box_max_text(box, font_size)[2]
+            tax, tay, taw, tah = box_align( (0, 0, text_area_width, font_size[1]), box, *self.__align)
+            self.__reset_text_offset() # reset animation
+        else:
+            tax, tay, taw, tah = box_align_text(text, box, font_size, False, *self.__align)
+        font.draw_on_frame(text, frame, tax, tay, fg, taw, tah)
