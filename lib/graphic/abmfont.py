@@ -14,7 +14,7 @@ def _small_ascii_draw_char_on(_, frame_pixel, unicode:int, x:int, y:int, color):
     xp:int = x
     yp:int = y
     for i in range(data_offset, data_offset+4):
-        vdata = int(ascii_data[i])
+        vdata:int = int(ascii_data[i])
         yp = y
         for bit in range(8):
             pat:int = 0b1 << bit
