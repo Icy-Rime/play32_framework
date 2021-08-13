@@ -21,6 +21,7 @@ def _draw_char_one_by_one(frame, text, x:int, y:int, color, width_limit:int, hei
     length:int = int(len(u8d))
     string:ptr8 = ptr8(u8d)
     tpoint: int = 0
+    frame_pixel = frame.pixel
     while tpoint < length:
         # get unicode char
         lead:int = string[tpoint]
@@ -53,7 +54,7 @@ def _draw_char_one_by_one(frame, text, x:int, y:int, color, width_limit:int, hei
         if unicode == ASCII_T or unicode == ASCII_N or unicode == ASCII_R:
             continue
         # draw
-        draw_char_on(frame, unicode, moved_x, moved_y, color)
+        draw_char_on(frame, frame_pixel, unicode, moved_x, moved_y, color)
         moved_x += font_width
     return count
 
@@ -154,7 +155,7 @@ class FontDraw():
 
 # ASCII
 @micropython.viper
-def _ascii_draw_char_on(frame, unicode:int, x:int, y:int, color):
+def _ascii_draw_char_on(frame, _, unicode:int, x:int, y:int, color):
     if unicode <32 or unicode > 127:
         return
     frame.text(bytes([unicode]).decode("ascii"), x, y, color)

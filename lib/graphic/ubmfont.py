@@ -28,7 +28,7 @@ class FontDrawUnicode(FontDraw):
 
     # @timed_function
     @micropython.viper
-    def _unicode_draw_char_on(self, frame, unicode:int, x:int, y:int, color):
+    def _unicode_draw_char_on(self, _, frame_pixel, unicode:int, x:int, y:int, color):
         if unicode > 0xFFFF:
             return
         area:int = unicode & 0xFF
@@ -57,7 +57,6 @@ class FontDrawUnicode(FontDraw):
             return
         # draw on frame
         font_data = ptr8(data)
-        pixel = frame.pixel
         xp:int = x
         yp:int = y
         end_x:int = x + int(self.__font_width)
@@ -67,7 +66,7 @@ class FontDrawUnicode(FontDraw):
                 pat:int = 0b10000000 >> bit
                 if (hdata & pat) != 0:
                     if 0 <= xp and 0 <= yp:
-                        pixel(xp, yp, color)
+                        frame_pixel(xp, yp, color)
                 xp += 1
             if xp >= end_x:
                 xp = x
