@@ -1,0 +1,47 @@
+<!ELEMENT Widget EMPTY>
+<!ELEMENT Button EMPTY>
+<!ELEMENT Text EMPTY>
+<!ELEMENT ScrollText EMPTY>
+<!ELEMENT PBMImage EMPTY>
+<!ELEMENT WidgetLayout (Widget|Button|Text|ScrollText|PBMImage|WidgetLayout|FixedLayout|DevidedLayout)*>
+<!ELEMENT FixedLayout (Widget|Button|Text|ScrollText|PBMImage|WidgetLayout|FixedLayout|DevidedLayout)*>
+<!ELEMENT DevidedLayout (Widget|Button|Text|ScrollText|PBMImage|WidgetLayout|FixedLayout|DevidedLayout)*>
+<!-- widget -->
+<!ATTLIST Widget id ID #IMPLIED>
+<!ATTLIST Widget box CDATA "0,0,0,0">
+<!ATTLIST Button id ID #IMPLIED>
+<!ATTLIST Button box CDATA "0,0,0,0">
+<!ATTLIST Button label CDATA "">
+<!ATTLIST Button color CDATA "1">
+<!ATTLIST Button pressed (true|false) "false">
+<!ATTLIST Button focused (true|false) "false">
+<!ATTLIST Text id ID #IMPLIED>
+<!ATTLIST Text box CDATA "0,0,0,0">
+<!ATTLIST Text text CDATA "">
+<!ATTLIST Text color CDATA "1">
+<!ATTLIST Text inverted (true|false) "false">
+<!ATTLIST Text align CDATA "center,center">
+<!ATTLIST ScrollText id ID #IMPLIED>
+<!ATTLIST ScrollText box CDATA "0,0,0,0">
+<!ATTLIST ScrollText text CDATA "">
+<!ATTLIST ScrollText color CDATA "1">
+<!ATTLIST ScrollText speed CDATA "32">
+<!ATTLIST ScrollText inverted (true|false) "false">
+<!ATTLIST ScrollText align CDATA "center,center">
+<!ATTLIST PBMImage id ID #IMPLIED>
+<!ATTLIST PBMImage box CDATA "0,0,0,0">
+<!ATTLIST PBMImage src CDATA "">
+<!ATTLIST PBMImage key_color CDATA "none">
+<!ATTLIST PBMImage background CDATA "none">
+<!ATTLIST PBMImage align CDATA "center,center">
+<!-- layout -->
+<!ATTLIST WidgetLayout id ID #IMPLIED>
+<!ATTLIST WidgetLayout box CDATA "0,0,0,0">
+<!ATTLIST FixedLayout id ID #IMPLIED>
+<!ATTLIST FixedLayout box CDATA "0,0,0,0">
+<!ATTLIST FixedLayout direction (horizontal|vertical) "horizontal">
+<!ATTLIST FixedLayout start CDATA "0">
+<!ATTLIST FixedLayout end CDATA "0">
+<!ATTLIST DevidedLayout id ID #IMPLIED>
+<!ATTLIST DevidedLayout box CDATA "0,0,0,0">
+<!ATTLIST DevidedLayout direction (horizontal|vertical) "horizontal">
