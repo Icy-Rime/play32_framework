@@ -10,6 +10,7 @@ ly.render()
 """
 
 __class_map = {}
+__font_map = {}
 
 def register_class(name, cls):
     from graphic.widget import Widget
@@ -27,6 +28,18 @@ def register_default_classes():
     __class_map[b"FixedLayout"] = FixedLayout
     __class_map[b"DevidedLayout"] = DevidedLayout
 
+def register_class(name, cls):
+    from graphic.bmfont import FontDraw
+    if issubclass(cls, FontDraw):
+        __font_map[name.encode("utf8")] = cls
+
+def register_default_fonts():
+    from resource.font import get_font_8px, get_font_16px
+    from graphic.abmfont import FontDrawSmallAscii
+    __font_map[b"font4"] = FontDrawSmallAscii()
+    __font_map[b"font8"] = get_font_8px()
+    __font_map[b"font16"] = get_font_16px()
+
 def load_from_xml(root, frame = None, box = (0, 0, 0, 0)):
     tag_name = root.value
     if tag_name not in __class_map:
@@ -37,8 +50,15 @@ def load_from_xml(root, frame = None, box = (0, 0, 0, 0)):
     widget.set_box(box)
     # set attr
     for b_name, b_value in root.iterate_attributes():
-        if b_value != None:
-            name = b_name.decode("utf8")
+        if b_value == None:
+            continue
+        name = b_name.decode("utf8")
+        if name == "font":
+            if b_value not in __font_map:
+                continue
+            else:
+                value = __font_map[b_value]
+        else:
             value = b_value.decode("utf8")
         set_func = getattr(widget, "set_"+name, None)
         if callable(set_func):

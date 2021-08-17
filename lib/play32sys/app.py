@@ -32,7 +32,7 @@ def __save_dict():
         usys.print_exception(e)
 
 # system function
-def _on_boot_(debug=False, app_name=None, *app_args, **app_kws):
+def _on_boot_(app_name=None, *app_args, **app_kws):
     __init_dict()
     # >>>> init screen <<<<
     import hal_screen
@@ -56,13 +56,8 @@ def _on_boot_(debug=False, app_name=None, *app_args, **app_kws):
     clear_temporary_dir()
     if isinstance(boot_app, str) and boot_app != "":
         # app.clear_boot_app()
-        try:
-            gc.collect()
-            run_app(boot_app, *args, **kws)
-        except Exception as e:
-            usys.print_exception(e)
-            if not debug:
-                reset_and_run_app("")
+        gc.collect()
+        run_app(boot_app, *args, **kws)
     else:
         call_component('app_selector')
 
@@ -208,3 +203,16 @@ def timed_function_async(f, *args, **kwargs):
         print('Function [{}] Time = {:6.3f}ms'.format(myname, delta/1000))
         return result
     return new_func
+
+def print_exception(e):
+    import hal_screen, uio, usys
+    from graphic import abmfont, framebuf_console, framebuf_helper
+    WHITE = framebuf_helper.get_white_color(hal_screen.get_format())
+    hal_screen.init()
+    frame = hal_screen.get_framebuffer()
+    w, h = hal_screen.get_size()
+    console = framebuf_console.Console(frame, w, h, abmfont.FontDrawSmallAscii(), WHITE, hal_screen.refresh)
+    err = uio.BytesIO()
+    usys.print_exception(e, err)
+    err.seek(0)
+    console.log(err.read().decode("utf8"))

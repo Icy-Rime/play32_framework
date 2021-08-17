@@ -4,9 +4,8 @@ _threshold = (gc.mem_free() * 60) // 100 # 60% gc auto collect
 gc.threshold(_threshold)
 print("gc threshold has been set to", _threshold)
 del _threshold
-# >>>> recovery mode <<<<
-import usys
 try:
+    # >>>> recovery mode <<<<
     import hal_keypad
     hal_keypad.init()
     hal_keypad.clear_key_status([hal_keypad.KEY_A, hal_keypad.KEY_B])
@@ -23,13 +22,22 @@ try:
     # >>>> main <<<<
     else:
         from play32sys import app
-        app._on_boot_(True)
+        app._on_boot_()
+        # app._on_boot_("txt_reader")
         pass
 except Exception as e:
-    usys.print_exception(e)
-    import updater
-    updater._on_enter_recovery_mode_()
-# app._on_boot_(True, "txt_reader")
+    if type(e) != KeyboardInterrupt:
+        import usys
+        usys.print_exception(e)
+        try:
+            from play32sys import app
+            app.print_exception(e)
+        except: pass
+    usys.modules.clear()
+    globals().clear()
+    import gc
+    gc.collect()
+print("==== End Main ====")
 
 # test below
 # from play32sys import network_helper
