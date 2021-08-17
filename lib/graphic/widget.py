@@ -1,11 +1,7 @@
-from graphic.bmfont import FontDrawAscii
-from graphic.layout import box_align, box_max_text, box_padding, box_align_text, box_devide, config_to_bool, config_to_int, config_to_box, config_to_color, config_to_align, config_to_direction, DIRECTION_HORIZONTAL, ALIGN_CENTER, EMPTY_BOX
 from utime import ticks_us, ticks_diff
 from usys import print_exception
-from hal_screen import get_format
-from graphic.framebuf_helper import ensure_same_format, get_white_color
-from graphic import pbm
-import framebuf
+from graphic.bmfont import FontDrawAscii
+from graphic.layout import box_align, box_max_text, box_padding, box_align_text, box_devide, config_to_bool, config_to_int, config_to_box, config_to_color, config_to_align, config_to_direction, DIRECTION_HORIZONTAL, ALIGN_CENTER, EMPTY_BOX
 
 class Widget():
     def __init__(self) -> None:
@@ -341,6 +337,10 @@ class PBMImage(Widget):
         self.__align = config_to_align(value)
 
     def render(self):
+        from hal_screen import get_format
+        from graphic.framebuf_helper import ensure_same_format, get_white_color
+        from graphic import pbm
+        import framebuf
         SCREEN_FORMAT = get_format()
         box = self._box
         bg = self.__background

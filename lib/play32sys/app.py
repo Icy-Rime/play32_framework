@@ -89,10 +89,15 @@ def render_boot_image():
         hal_screen.refresh()
         boot_image_path = PLAY32_ICON
     if boot_image_path != "":
-        from graphic import framebuf_helper, pbm
+        from graphic import framebuf_helper
         import framebuf, hal_screen
-        with open(boot_image_path, 'rb') as ifile:
-            iw, ih, ifm, idata, _ = pbm.read_image(ifile)
+        if boot_image_path == PLAY32_ICON:
+            from resource.image.play32_icon import PLAY32_ICON_DATA
+            iw, ih, idata = PLAY32_ICON_DATA
+        else:
+            from graphic import pbm
+            with open(boot_image_path, 'rb') as ifile:
+                iw, ih, _, idata = pbm.read_image(ifile)[:4]
         image = framebuf.FrameBuffer(idata, iw, ih, framebuf.MONO_HLSB)
         image = framebuf_helper.ensure_same_format(
             image, 
@@ -106,7 +111,7 @@ def render_boot_image():
         frame.fill(0)
         frame.blit(image, (sw - iw) // 2, (sh - ih) // 2, 0)
         hal_screen.refresh()
-        del idata, image, iw, ih, sw, sh, ifm
+        del idata, image, iw, ih, sw, sh
         return True
     return False
 
