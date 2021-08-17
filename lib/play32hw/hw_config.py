@@ -1,28 +1,21 @@
-import ujson
-from play32sys import path
-__p = path.join(path.get_data_path(), "hw_config.json")
-with open(__p, "rb") as f:
-    __json = ujson.load(f)
-
-SCREEN_WIDTH = __json["screen_width"]
-SCREEN_HEIGHT = __json["screen_height"]
-SCREEN_DRIVER = __json["screen_driver"]
-SCREEN_SCL = __json["pin_screen_scl"]
-SCREEN_SDA_MOSI = __json["pin_screen_sda_mosi"]
-SCREEN_CS = __json["pin_screen_cs"]
-SCREEN_DC = __json["pin_screen_dc"]
-SCREEN_RST = __json["pin_screen_rst"]
-PIN_KEY_A = __json["pin_key_a"]
-PIN_KEY_B = __json["pin_key_b"]
-PIN_KEY_UP = __json["pin_key_up"]
-PIN_KEY_DOWN = __json["pin_key_down"]
-PIN_KEY_LEFT = __json["pin_key_left"]
-PIN_KEY_RIGHT = __json["pin_key_right"]
-PIN_BUZZ = __json["pin_buzz"]
-PIN_LED = __json["pin_led"]
-PIN_BATTERY = __json["pin_battery"]
-PIN_SD_CS = __json["pin_sd_cs"]
-PIN_SD_SCK = __json["pin_sd_sck"]
-PIN_SD_MISO = __json["pin_sd_miso"]
-PIN_SD_MOSI = __json["pin_sd_mosi"]
-del __p, __json
+SCREEN_WIDTH = 128
+SCREEN_HEIGHT = 64
+SCREEN_DRIVER = "ssd1306" # "ssd1351"
+SCREEN_SCL = 18
+SCREEN_SDA_MOSI = 19
+SCREEN_CS = 0
+SCREEN_DC = 0
+SCREEN_RST = 0
+PIN_KEY_A = 34
+PIN_KEY_B = 35
+PIN_KEY_UP = 15
+PIN_KEY_DOWN = 13
+PIN_KEY_LEFT = 12
+PIN_KEY_RIGHT = 14
+PIN_BUZZ = 5
+PIN_LED = 27
+PIN_BATTERY = 36
+PIN_SD_CS = 22
+PIN_SD_SCK = 23
+PIN_SD_MISO = 25
+PIN_SD_MOSI = 26

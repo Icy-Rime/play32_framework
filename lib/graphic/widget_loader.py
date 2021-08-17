@@ -9,6 +9,8 @@ ly = widget_loader.load_from_xml(root, frame, box)
 ly.render()
 """
 
+from utils.xml import decode_xml_entity, load_xml_file
+
 __class_map = {}
 __font_map = {}
 
@@ -59,7 +61,7 @@ def load_from_xml(root, frame = None, box = (0, 0, 0, 0)):
             else:
                 value = __font_map[b_value]
         else:
-            value = b_value.decode("utf8")
+            value = decode_xml_entity(b_value.decode("utf8"))
         set_func = getattr(widget, "set_"+name, None)
         if callable(set_func):
             try:
@@ -75,4 +77,10 @@ def load_from_xml(root, frame = None, box = (0, 0, 0, 0)):
         for child in root.children:
             child_widget = load_from_xml(child, frame, box)
             append_child(child_widget) # None is filted in append_child method.
+    return widget
+
+def load_from_xml_file(xml_path, frame = None, box = (0, 0, 0, 0)):
+    xml_node = load_xml_file(xml_path)
+    widget = load_from_xml(xml_node, frame, box)
+    xml_node.close()
     return widget

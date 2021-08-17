@@ -227,6 +227,8 @@ class ScrollText(Widget):
         font_width = self.__font.get_font_size()[0]
         area_width = self._box[2]
         self.__need_scroll = (len(self.__text) * font_width) > area_width
+        if self.__need_scroll:
+            self.__text = self.__text + " "
         self.__last_update_us = ticks_us()
         self.__reset_text_offset()
 

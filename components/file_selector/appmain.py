@@ -2,19 +2,17 @@ from graphic import pbm, framebuf_helper
 from play32sys import path, app, battery
 from play32hw import cpu
 import framebuf, ujson, uos
-import hal_screen as screen
-import hal_keypad as keypad
-import hal_battery
+import hal_screen, hal_keypad, hal_battery
 from resource.font import get_font_8px
 from utime import ticks_ms, ticks_diff, ticks_add
 FONT_8 = get_font_8px()
 MANIFEST_FILE = "manifest.json"
 MANIFEST_KEY_NAME = "name"
 MANIFEST_KEY_ICON = "icon"
-SCREEN_FORMAT = screen.get_format()
+SCREEN_FORMAT = hal_screen.get_format()
 COLOR_WHITE = framebuf_helper.get_white_color(SCREEN_FORMAT)
 ICON_SIZE_W, ICON_SIZE_H = (48, 48)
-SCR_W, SCR_H = screen.get_size()
+SCR_W, SCR_H = hal_screen.get_size()
 FNT_W, FNT_H = FONT_8.get_font_size()
 
 THIS_APP_NAME = "app_selector"
@@ -26,8 +24,8 @@ def main(app_name, *args, **kws):
     # init
     global THIS_APP_NAME
     THIS_APP_NAME = app_name
-    screen.init()
-    keypad.init()
+    hal_screen.init()
+    hal_keypad.init()
     hal_battery.init()
     init()
     render_point_app()
@@ -73,12 +71,12 @@ def get_app_info(app_name):
         return display_name, DEFAULT_ICON
 
 def render_point_app():
-    frame = screen.get_framebuffer()
+    frame = hal_screen.get_framebuffer()
     frame.fill(0)
     if app_pointer < 0:
         FONT_8.draw_on_frame("No Apps.", frame, 0, 0, COLOR_WHITE)
         FONT_8.draw_on_frame("Press B to enter FTP mode.", frame, 0, 8, COLOR_WHITE, SCR_W, SCR_H-8)
-        screen.refresh()
+        hal_screen.refresh()
         return
     app_name = app_list[app_pointer]
     display_name, display_icon = get_app_info(app_name)
@@ -95,7 +93,7 @@ def render_point_app():
     frame.blit(display_icon, offset_x_icon, 0)
 
 def render_battery_level():
-    frame = screen.get_framebuffer()
+    frame = hal_screen.get_framebuffer()
     battery_level = str(battery.get_battery_level())
     width_battery_level = FNT_W * len(battery_level)
     offset_x_battery_level = SCR_W - width_battery_level
@@ -105,36 +103,36 @@ def render_battery_level():
     FONT_8.draw_on_frame(battery_level, frame, offset_x_battery_level, 0, COLOR_WHITE)
 
 def render_loading():
-    frame = screen.get_framebuffer()
+    frame = hal_screen.get_framebuffer()
     frame.fill(0)
     width_text = FNT_W * len("loading")
     FONT_8.draw_on_frame("loading", frame, (SCR_W - width_text) // 2, (SCR_H - FNT_H) // 2, COLOR_WHITE)
-    screen.refresh()
+    hal_screen.refresh()
 
 def run_app():
     if app_pointer < 0:
         return
     app_name = app_list[app_pointer]
     display_name, display_icon = get_app_info(app_name)
-    frame = screen.get_framebuffer()
+    frame = hal_screen.get_framebuffer()
     frame.fill(0)
     # draw icon
     offset_x_icon = (SCR_W - ICON_SIZE_W) // 2
     offset_y_icon = (SCR_H - ICON_SIZE_H) // 2
     frame.blit(display_icon, offset_x_icon, offset_y_icon)
-    screen.refresh()
+    hal_screen.refresh()
     # reset and run
     app.disable_boot_image()
     app.reset_and_run_app(app_name)
 
 def main_loop():
     global app_pointer
-    get_key_event = keypad.get_key_event
-    parse_key_event = keypad.parse_key_event
-    KEY_LEFT = keypad.KEY_LEFT
-    KEY_RIGHT = keypad.KEY_RIGHT
-    KEY_A = keypad.KEY_A
-    KEY_B = keypad.KEY_B
+    get_key_event = hal_keypad.get_key_event
+    parse_key_event = hal_keypad.parse_key_event
+    KEY_LEFT = hal_keypad.KEY_LEFT
+    KEY_RIGHT = hal_keypad.KEY_RIGHT
+    KEY_A = hal_keypad.KEY_A
+    KEY_B = hal_keypad.KEY_B
     SIZE = len(app_list)
     t_update_battery_ms = ticks_ms()
     cpu.set_cpu_speed(cpu.VERY_SLOW)
@@ -142,7 +140,7 @@ def main_loop():
         should_refresh_screen = False
         for event in get_key_event():
             event_type, key = parse_key_event(event)
-            if event_type == keypad.EVENT_KEY_PRESS:
+            if event_type == hal_keypad.EVENT_KEY_PRESS:
                 if key == KEY_LEFT:
                     app_pointer -= 1
                 if key == KEY_RIGHT:
@@ -178,4 +176,4 @@ def main_loop():
         else:
             battery.measure()
         if should_refresh_screen:
-            screen.refresh()
+            hal_screen.refresh()

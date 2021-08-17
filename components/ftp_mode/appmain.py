@@ -1,17 +1,16 @@
 from play32sys import network_helper
-import hal_keypad as keypad
-import hal_screen as screen
+import hal_keypad, hal_screen
 from graphic import framebuf_helper
 import microftpd, utime
-COLOR_WHITE = framebuf_helper.get_white_color(screen.get_format())
+COLOR_WHITE = framebuf_helper.get_white_color(hal_screen.get_format())
 
 def main(app_name, *args, **kws):
-    screen.init()
-    keypad.init()
+    hal_screen.init()
+    hal_keypad.init()
     network_helper.deactive_all()
-    screen.get_framebuffer().fill(0)
-    screen.get_framebuffer().text("FTP MODE", 0, 0, COLOR_WHITE)
-    screen.refresh()
+    hal_screen.get_framebuffer().fill(0)
+    hal_screen.get_framebuffer().text("FTP MODE", 0, 0, COLOR_WHITE)
+    hal_screen.refresh()
     utime.sleep_ms(1000)
     ftp = microftpd.FTPServer()
     try:
@@ -20,15 +19,15 @@ def main(app_name, *args, **kws):
     except Exception as e:
         import usys
         usys.print_exception(e)
-        screen.get_framebuffer().fill(0)
-        screen.get_framebuffer().text("Error...", 0, 0, COLOR_WHITE)
-        screen.get_framebuffer().text("Exiting...", 0, 16, COLOR_WHITE)
-        screen.refresh()
+        hal_screen.get_framebuffer().fill(0)
+        hal_screen.get_framebuffer().text("Error...", 0, 0, COLOR_WHITE)
+        hal_screen.get_framebuffer().text("Exiting...", 0, 16, COLOR_WHITE)
+        hal_screen.refresh()
         utime.sleep_ms(2000)
         return
     wlan_connected = wlan.isconnected()
     def start():
-        frame = screen.get_framebuffer()
+        frame = hal_screen.get_framebuffer()
         frame.fill(0)
         frame.text("\"B\" EXIT", 0, 0, COLOR_WHITE)
         frame.text("-Port 21", 0, 40, COLOR_WHITE)
@@ -49,7 +48,7 @@ def main(app_name, *args, **kws):
         ftp.deinit()
         ftp.set_host(ip)
         ftp.init()
-        screen.refresh()
+        hal_screen.refresh()
     start()
     _loop = True
     while _loop:
@@ -58,10 +57,10 @@ def main(app_name, *args, **kws):
         except Exception as e:
             import usys
             usys.print_exception(e)
-            screen.get_framebuffer().fill(0)
-            screen.get_framebuffer().text("Error...", 0, 0, COLOR_WHITE)
-            screen.get_framebuffer().text("Exiting...", 0, 16, COLOR_WHITE)
-            screen.refresh()
+            hal_screen.get_framebuffer().fill(0)
+            hal_screen.get_framebuffer().text("Error...", 0, 0, COLOR_WHITE)
+            hal_screen.get_framebuffer().text("Exiting...", 0, 16, COLOR_WHITE)
+            hal_screen.refresh()
             utime.sleep_ms(2000)
             ftp.deinit()
             wlan.disconnect()
@@ -69,10 +68,10 @@ def main(app_name, *args, **kws):
         if wlan.isconnected() != wlan_connected:
             wlan_connected = wlan.isconnected()
             start()
-        for event in keypad.get_key_event():
-            event_type, key = keypad.parse_key_event(event)
-            if event_type == keypad.EVENT_KEY_PRESS:
-                if key == keypad.KEY_B:
+        for event in hal_keypad.get_key_event():
+            event_type, key = hal_keypad.parse_key_event(event)
+            if event_type == hal_keypad.EVENT_KEY_PRESS:
+                if key == hal_keypad.KEY_B:
                     ftp.deinit()
                     wlan.disconnect()
                     _loop = False # exit
