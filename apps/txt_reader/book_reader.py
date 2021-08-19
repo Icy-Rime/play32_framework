@@ -1,6 +1,6 @@
 from play32sys import app
 from graphic import framebuf_helper, ubmfont, bmfont
-from resource import font
+from buildin_resource import font
 from book import Book, Bookmark, get_text_utf8_length
 import hal_screen, gc
 

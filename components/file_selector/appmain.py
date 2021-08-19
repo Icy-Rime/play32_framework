@@ -3,7 +3,7 @@ from play32sys import path, app, battery
 from play32hw import cpu
 import framebuf, ujson, uos
 import hal_screen, hal_keypad, hal_battery
-from resource.font import get_font_8px
+from buildin_resource.font import get_font_8px
 from utime import ticks_ms, ticks_diff, ticks_add
 FONT_8 = get_font_8px()
 MANIFEST_FILE = "manifest.json"

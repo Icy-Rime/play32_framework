@@ -2,7 +2,7 @@ import hal_screen, hal_keypad, hal_buzz, uos
 from play32sys import app, path
 from graphic import framebuf_helper
 from play32hw.buzz_note_sound import BuzzNoteSoundFile
-from resource.font import get_font_8px, get_font_16px
+from buildin_resource.font import get_font_8px, get_font_16px
 FONT_8 = get_font_8px()
 FONT_16 = get_font_16px()
 COLOR_WHITE = framebuf_helper.get_white_color(hal_screen.get_format())

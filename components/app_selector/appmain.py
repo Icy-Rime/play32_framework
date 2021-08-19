@@ -6,7 +6,7 @@ import hal_screen, hal_keypad, hal_battery, hal_sdcard
 from utime import ticks_ms, ticks_diff, ticks_add
 from graphic.widget import FixedLayout, PBMImage, ScrollText, Text
 from graphic.layout import ALIGN_CENTER, DIRECTION_HORIZONTAL, DIRECTION_VERTICAL, box_align
-from resource.font import get_font_8px
+from buildin_resource.font import get_font_8px
 
 MANIFEST_FILE = "manifest.json"
 MANIFEST_KEY_NAME = "name"
@@ -108,7 +108,6 @@ def get_app_info(app_name):
 
 def render_point_app(full=False):
     if app_pointer < 0:
-        from resource.font import get_font_8px
         frame = hal_screen.get_framebuffer()
         FONT_8 = get_font_8px()
         FONT_8.draw_on_frame("No Apps.", frame, 0, 0, COLOR_WHITE)

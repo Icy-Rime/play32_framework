@@ -20,7 +20,7 @@ def get_font_16px():
         try:
             f = open('/resource/font/pix16x16.ufnt', "rb")
         except:
-            from resource.font.fallback16x16 import data_stream as f
+            from buildin_resource.font.fallback16x16 import data_stream as f
         __font_16 = ubmfont.FontDrawUnicode(f)
 
     return __font_16

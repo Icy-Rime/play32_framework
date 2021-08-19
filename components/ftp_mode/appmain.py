@@ -4,6 +4,14 @@ from graphic import framebuf_helper
 import microftpd, utime
 COLOR_WHITE = framebuf_helper.get_white_color(hal_screen.get_format())
 
+class ScropedFTPClientInterface(microftpd.DefaultClientInterface):
+    def valid_path(self, path:str):
+        if path == "/":
+            return True
+        if path.startswith("/apps") or path.startswith("/data") or path.startswith("/resource") or path.startswith("/sd") or path.startswith("/tmp"):
+            return True
+        return False
+
 def main(app_name, *args, **kws):
     hal_screen.init()
     hal_keypad.init()
@@ -13,6 +21,7 @@ def main(app_name, *args, **kws):
     hal_screen.refresh()
     utime.sleep_ms(1000)
     ftp = microftpd.FTPServer()
+    ftp.set_client_interface_class(ScropedFTPClientInterface)
     try:
         ap = network_helper.ap("Play32AP", "12345678")
         wlan = network_helper.connect()

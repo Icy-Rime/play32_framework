@@ -36,7 +36,7 @@ def register_class(name, cls):
         __font_map[name.encode("utf8")] = cls
 
 def register_default_fonts():
-    from resource.font import get_font_8px, get_font_16px
+    from buildin_resource.font import get_font_8px, get_font_16px
     from graphic.abmfont import FontDrawSmallAscii
     __font_map[b"font4"] = FontDrawSmallAscii()
     __font_map[b"font8"] = get_font_8px()

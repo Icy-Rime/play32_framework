@@ -78,16 +78,18 @@ __sdcard = None
 def init():
     global __sdcard
     if __sdcard == None:
-        sd = SDCard(
-            slot=3,
-            width=1,
-            sck=Pin(PIN_SD_SCK),
-            miso=Pin(PIN_SD_MISO),
-            mosi=Pin(PIN_SD_MOSI),
-            cs=Pin(PIN_SD_CS),
-            # freq=20_000_000
-        )
-        __sdcard = __SDCardBlockDevice(sd)
+        try:
+            sd = SDCard(
+                slot=3,
+                width=1,
+                sck=Pin(PIN_SD_SCK),
+                miso=Pin(PIN_SD_MISO),
+                mosi=Pin(PIN_SD_MOSI),
+                cs=Pin(PIN_SD_CS),
+                # freq=20_000_000
+            )
+            __sdcard = __SDCardBlockDevice(sd)
+        except: pass
 
 def mount():
     try:

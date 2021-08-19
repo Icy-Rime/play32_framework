@@ -1,5 +1,5 @@
 from graphic import framebuf_helper, ubmfont, bmfont
-from resource import font
+from buildin_resource import font
 import hal_screen
 
 WHITE = framebuf_helper.get_white_color(hal_screen.get_format())

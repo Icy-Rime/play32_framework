@@ -1,7 +1,7 @@
 import hal_screen, hal_keypad, utime, framebuf
 from graphic import framebuf_console, framebuf_helper, pbm
 from play32sys import app, path
-from resource.font import get_font_8px
+from buildin_resource.font import get_font_8px
 FONT_8 = get_font_8px()
 WHITE = framebuf_helper.get_white_color(hal_screen.get_format())
 SCR_W, SCR_H = hal_screen.get_size()

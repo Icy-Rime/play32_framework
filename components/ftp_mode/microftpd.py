@@ -1,6 +1,5 @@
-import usocket, uos, utime
+import usocket, uos, utime, ntptime
 from micropython import const
-import gc
 
 # typing
 import socket
@@ -11,11 +10,13 @@ _PORT_BASE = const(10000)
 _PORT_LIMIT = const(65535)
 _MAX_IDLE_TIME = const(60000)
 _MAX_TRANSFER_TIME = const(2000)
+_EPOCH_TIME_DIFFER = const(946684800)
 
 DEBUG = False
 WELCOME_MESSAGE = "Hello, this is Play32."
 OK_250_MESSAGE = "250 OK\r\n"
 FAIL_550_MESSAGE = "550 Failed\r\n"
+NTP_HOST = "ntp.aliyun.com"
 
 class TrySocket():
     def __init__(self, sock:socket.socket, buffer_size=_BUFFER_SIZE):
@@ -57,10 +58,10 @@ class TrySocket():
         if type(msg) == str:
             msg = msg.encode("utf8")
             if DEBUG:
-                print("RSP:", msg.strip())
+                print("RSP_TEXT:", msg.strip())
         else:
             if DEBUG:
-                print("DATA:", msg)
+                print("RSP_DATA:", msg)
         try:
             return self.__s.sendall(msg)
         except:
@@ -80,10 +81,11 @@ def get_a_port():
         _port_index = _PORT_BASE
     return _port_index
 
-def send_list_data(path, dataclient, full):
+def send_list_data(path, dataclient, full, valid_path_func):
     try:  # whether path is a directory name
         for fname in sorted(uos.listdir(path), key=str.lower):
-            dataclient.send_all(make_description(path, fname, full))
+            if valid_path_func(get_absolute_path(path, fname)):
+                dataclient.send_all(make_description(path, fname, full))
     except:  # path may be a file name or pattern
         pattern = path.split("/")[-1]
         path = path[:-(len(pattern) + 1)]
@@ -91,7 +93,8 @@ def send_list_data(path, dataclient, full):
             path = "/"
         for fname in sorted(uos.listdir(path), key=str.lower):
             if fncmp(fname, pattern):
-                dataclient.send_all(make_description(path, fname, full))
+                if valid_path_func(get_absolute_path(path, fname)):
+                    dataclient.send_all(make_description(path, fname, full))
 
 _month_name = ("", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
@@ -108,8 +111,10 @@ def make_description_linux(path, fname):
                         if (stat[0] & 0o170000 == 0o040000)
                         else "-rw-r--r--")
     file_size = stat[6]
-    tm = stat[8] & 0xffffffff
-    tm = utime.localtime(tm if tm < 0x80000000 else tm - 0x100000000)
+    tm = stat[8]
+    # tm = stat[8] & 0xffffffff
+    # tm = tm if tm < 0x80000000 else tm - 0x100000000
+    tm = utime.localtime(tm)
     if tm[0] != utime.localtime()[0]:
         mtimestr = "{} {} {}".format(_month_name[tm[1]], tm[2], tm[0])
         description = "{} 1 owner group {} {} {} {} {}\r\n".\
@@ -186,17 +191,71 @@ def fncmp(fname, pattern):
     else:
         return False
 
+def is_folder(path):
+    return (uos.stat(path)[0] & 0o170000) == 0o040000
+
+def is_exist(path):
+    try:
+        uos.stat(path)
+        return True
+    except:
+        return False
+
+class DefaultClientInterface():
+    def __init__(self) -> None:
+        # must have zero required param.
+        self.cwd = "/"
+        pass
+
+    def set_cwd(self, path):
+        self.cwd = path
+
+    def get_cwd(self):
+        return self.cwd
+
+    def valid_path(self, path):
+        # only check if current user can operate this path. don t care about file_not_found etc.
+        return True
+
+    def on_site_cmd(self, payload):
+        # return True/False to indicate success/failed.
+        # return str/bytes as raw response.
+        # return None for unsupport command. (default)
+        return None
+
+    def on_input_user(self, user):
+        # return True to require password.
+        # return False to reject this username.
+        # return None to accept this username (treated as anonymous login). (default)
+        return None
+
+    def on_input_passwd(self, passwd):
+        # return True to indicate login success. (default)
+        # return False/None to indicate login failed.
+        return True
+
 class FTPServer():
-    def __init__(self, host="192.168.4.1", port=21):
+    def __init__(self, host="192.168.4.1", port=21, client_interface_class=DefaultClientInterface):
         self.host = host
         self.port = port
+        self.client_interface_class = client_interface_class
         self.server_socket = None
         self.clients = []
     
     def set_host(self, host):
         self.host = host
+    
+    def set_port(self, port):
+        self.port = port
+
+    def set_client_interface_class(self, client_interface_class):
+        self.client_interface_class = client_interface_class
 
     def init(self):
+        try:
+            ntptime.host = NTP_HOST
+            ntptime.settime()
+        except: pass
         if self.server_socket != None:
             try:
                 self.server_socket.close()
@@ -218,7 +277,7 @@ class FTPServer():
     def loop(self):
         client_socket, remote_addr = self.server_socket.try_accept()
         if client_socket != None:
-            c = FTPServerClient(self.host, client_socket, remote_addr)
+            c = FTPServerClient(self.host, client_socket, remote_addr, self.client_interface_class())
             self.clients.append(c)
         exit_client = []
         for client in self.clients:
@@ -235,19 +294,17 @@ class FTPServer():
         print("FTP Server started on", self.host)
         try:
             while True:
-                try:
-                    self.loop()
-                except: pass
+                self.loop()
         except KeyboardInterrupt:
             pass
 
 class FTPServerClient():
-    def __init__(self, host, client_socket, remote_addr):
+    def __init__(self, host, client_socket, remote_addr, client_interface):
         self.host = host
         self.client_socket = TrySocket(client_socket)
         self.remote_addr = remote_addr
+        self.client_interface = client_interface
         self.buffer = "".split()
-        self.cwd = "/"
         # self.loop()
         self.client_socket.send_all("220 {}\r\n".format(WELCOME_MESSAGE))
         self.data_port = get_a_port()
@@ -283,6 +340,7 @@ class FTPServerClient():
 
     def loop(self):
         client_socket = self.client_socket
+        client_interface = self.client_interface
         data = client_socket.try_readline()
         if data == None:
             if utime.ticks_diff(utime.ticks_ms(), self.last_active) > _MAX_IDLE_TIME:
@@ -298,142 +356,151 @@ class FTPServerClient():
             return
         command = data.split()[0].upper()
         payload = data[len(command):].lstrip()  # partition is missing
-        path = get_absolute_path(self.cwd, payload)
+        path = get_absolute_path(client_interface.get_cwd(), payload)
 
         # check for log-in state may done here, like
         # if self.logged_in == False and not command in\
         #    ("USER", "PASS", "QUIT"):
         #    client_socket.send_all("530 Not logged in.\r\n")
         #    return
-
-        if command == "USER":
-            # self.logged_in = True
-            client_socket.send_all("230 Logged in.\r\n")
-            # If you want to see a password,return
-            #   "331 Need password.\r\n" instead
-            # If you want to reject an user, return
-            #   "530 Not logged in.\r\n"
-        elif command == "PASS":
-            # you may check here for a valid password and return
-            # "530 Not logged in.\r\n" in case it"s wrong
-            # self.logged_in = True
-            client_socket.send_all("230 Logged in.\r\n")
-        elif command == "OPTS":
-            # OPTS UTF8 ON
-            client_socket.send_all("200 OK\r\n")
-        elif command == "SYST":
-            client_socket.send_all("215 UNIX Type: L8\r\n")
-        elif command in ("NOOP", "ABOR"):  # just accept & ignore
-            client_socket.send_all("200 OK\r\n")
-        elif command == "FEAT":
-             client_socket.send_all("211 no-features\r\n")
-        elif command == "TYPE":
-            client_socket.send_all("200 Transfer mode set\r\n")
-        elif command == "QUIT":
-            client_socket.send_all("221 Bye.\r\n")
-            self.close()
-        elif command == "PWD" or command == "XPWD":
-            client_socket.send_all("257 \"{}\"\r\n".format(self.cwd))
-        elif command == "CWD" or command == "XCWD":
-            try:
-                if (uos.stat(path)[0] & 0o170000) == 0o040000:
-                    self.cwd = path
+        try:
+            if command == "USER":
+                # If you want to see a password,return
+                #   "331 Need password.\r\n" instead
+                # If you want to reject an user, return
+                #   "530 Not logged in.\r\n"
+                ret = client_interface.on_input_user(payload)
+                if ret == None:
+                    client_socket.send_all("230 Logged in.\r\n")
+                elif ret:
+                    client_socket.send_all("331 Need password.\r\n")
+                else:
+                    client_socket.send_all("530 Not logged in.\r\n")
+            elif command == "PASS":
+                # you may check here for a valid password and return
+                # "530 Not logged in.\r\n" in case it"s wrong
+                if client_interface.on_input_passwd(payload):
+                    client_socket.send_all("230 Logged in.\r\n")
+                else:
+                    client_socket.send_all("530 Not logged in.\r\n")
+            elif command == "OPTS":
+                # OPTS UTF8 ON
+                client_socket.send_all("200 OK\r\n")
+            elif command == "SYST":
+                client_socket.send_all("215 UNIX Type: L8\r\n")
+            elif command in ("NOOP", "ABOR"):  # just accept & ignore
+                client_socket.send_all("200 OK\r\n")
+            elif command == "FEAT":
+                client_socket.send_all("211 no-features\r\n")
+            elif command == "TYPE":
+                client_socket.send_all("200 Transfer mode set\r\n")
+            elif command == "QUIT":
+                client_socket.send_all("221 Bye.\r\n")
+                self.close()
+            elif command == "PWD" or command == "XPWD":
+                client_socket.send_all("257 \"{}\"\r\n".format(client_interface.get_cwd()))
+            elif command == "CWD" or command == "XCWD":
+                if is_folder(path) and client_interface.valid_path(path):
+                    client_interface.set_cwd(path)
                     client_socket.send_all(OK_250_MESSAGE)
                 else:
                     client_socket.send_all(FAIL_550_MESSAGE)
-            except:
-                client_socket.send_all(FAIL_550_MESSAGE)
-        elif command == "PASV":
-            self.close_data_client()
-            client_socket.send_all("227 Entering Passive Mode ({},{},{}).\r\n".format(
-                self.host.replace(".", ","),
-                self.data_port >> 8, self.data_port % 256)
-            )
-        elif command == "LIST" or command == "NLST":
-            if not payload.startswith("-"):
-                place = path
-            else:
-                place = self.cwd
-            try:
+            elif command == "PASV":
+                self.close_data_client()
+                client_socket.send_all("227 Entering Passive Mode ({},{},{}).\r\n".format(
+                    self.host.replace(".", ","),
+                    self.data_port >> 8, self.data_port % 256)
+                )
+            elif command == "LIST" or command == "NLST":
+                if payload.startswith("-"):
+                    path = client_interface.get_cwd()
+                if not client_interface.valid_path(path):
+                    raise Exception()
                 self.wait_data_client()
                 client_socket.send_all("150 Here comes the directory listing.\r\n")
-                send_list_data(place, self.data_client, command == "LIST" or payload == "-l")
+                send_list_data(path, self.data_client, command == "LIST" or payload == "-l", client_interface.valid_path)
                 client_socket.send_all("226 Listed.\r\n")
-            except:
-                client_socket.send_all(FAIL_550_MESSAGE)
-            finally:
-                self.close_data_client()
-        elif command == "RETR":
-            try:
+            elif command == "RETR":
+                if not client_interface.valid_path(path):
+                    raise Exception()
                 self.wait_data_client()
                 client_socket.send_all("150 Opened data connection.\r\n")
                 with open(path, "rb") as file:
                     send_file_data(file, self.data_client)
                 client_socket.send_all("226 Done.\r\n")
-            except:
-                client_socket.send_all("550 Fail\r\n")
-            finally:
-                self.close_data_client()
-        elif command == "STOR":
-            try:
+            elif command == "STOR":
+                if not client_interface.valid_path(path):
+                    raise Exception()
                 self.wait_data_client()
                 client_socket.send_all("150 Opened data connection.\r\n")
                 with open(path, "wb") as file:
                     save_file_data(file, self.data_client)
                 client_socket.send_all("226 Done.\r\n")
-            except:
-                client_socket.send_all("550 Fail\r\n")
-            finally:
-                self.close_data_client()
-        # todo 整理ftp命令
-        elif command == "SIZE":
-            try:
+            # todo 整理ftp命令
+            elif command == "SIZE":
+                if not client_interface.valid_path(path):
+                    raise Exception()
                 client_socket.send_all("213 {}\r\n".format(uos.stat(path)[6]))
-            except:
-                client_socket.send_all("550 Fail\r\n")
-        elif command == "MDTM":
-            try:
+            elif command == "MDTM":
+                if not client_interface.valid_path(path):
+                    raise Exception()
                 tm=utime.localtime(uos.stat(path)[8])
                 client_socket.send_all("213 {:04d}{:02d}{:02d}{:02d}{:02d}{:02d}\r\n".format(*tm[0:6]))
-            except:
-                client_socket.send_all("550 Fail\r\n")
-        elif command == "DELE":
-            try:
+            elif command == "DELE":
+                if not client_interface.valid_path(path):
+                    raise Exception()
                 uos.remove(path)
-                client_socket.send_all("250 OK\r\n")
-            except:
-                client_socket.send_all("550 Fail\r\n")
-        elif command == "RNFR":
-            try:
+                client_socket.send_all(OK_250_MESSAGE)
+            elif command == "RNFR":
                 # just test if the name exists, exception if not
+                if not client_interface.valid_path(path):
+                    raise Exception()
                 uos.stat(path)
                 self.fromname = path
                 client_socket.send_all("350 Rename from\r\n")
-            except:
-                client_socket.send_all("550 Fail\r\n")
-        elif command == "RNTO":
+            elif command == "RNTO":
                 try:
+                    if not client_interface.valid_path(path):
+                        raise Exception()
                     uos.rename(self.fromname, path)
-                    client_socket.send_all("250 OK\r\n")
-                except:
-                    client_socket.send_all("550 Fail\r\n")
-                self.fromname = None
-        elif command == "RMD" or command == "XRMD":
-            try:
+                    client_socket.send_all(OK_250_MESSAGE)
+                finally:
+                    self.fromname = None
+            elif command == "RMD" or command == "XRMD":
+                if not client_interface.valid_path(path):
+                    raise Exception()
                 uos.rmdir(path)
-                client_socket.send_all("250 OK\r\n")
-            except:
-                client_socket.send_all("550 Fail\r\n")
-        elif command == "MKD" or command == "XMKD":
-            try:
+                client_socket.send_all(OK_250_MESSAGE)
+            elif command == "MKD" or command == "XMKD":
+                if not client_interface.valid_path(path):
+                    raise Exception()
                 uos.mkdir(path)
-                client_socket.send_all("250 OK\r\n")
-            except:
-                client_socket.send_all("550 Fail\r\n")
-        elif command == "SITE":
-            # site command
-            client_socket.send_all("502 Unsupported command.\r\n")
-        else:
-            client_socket.send_all("502 Unsupported command.\r\n")
+                client_socket.send_all(OK_250_MESSAGE)
+            elif command == "SITE":
+                ret = None
+                if callable(client_interface.on_site_cmd):
+                    ret = client_interface.on_site_cmd(payload)
+                # site command
+                if type(ret) == bool:
+                    if ret:
+                        client_socket.send_all(OK_250_MESSAGE)
+                    else:
+                        client_socket.send_all(FAIL_550_MESSAGE)
+                elif type(ret) == str:
+                    if not ret.endswith("\r\n"):
+                        ret += "\r\n"
+                    client_socket.send_all(ret)
+                elif type(ret) == bytes:
+                    if not ret.endswith(b"\r\n"):
+                        ret += b"\r\n"
+                    client_socket.send_all(ret)
+                else:
+                    client_socket.send_all("502 Unsupported command.\r\n")
+            else:
+                client_socket.send_all("502 Unsupported command.\r\n")
+        except:
+            client_socket.send_all(FAIL_550_MESSAGE)
+        finally:
+            self.close_data_client()
         if DEBUG:
             print("========")

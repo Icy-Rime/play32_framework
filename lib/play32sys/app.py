@@ -1,6 +1,6 @@
 import uos, usys, ujson
-from play32sys.path import join, get_tmp_path, get_app_path, get_component_path, clear_temporary_dir
-from resource.image import PLAY32_ICON
+from play32sys.path import join, exist, get_tmp_path, get_app_path, get_component_path, clear_temporary_dir
+from buildin_resource.image import DEFAULT_BOOT_ICON
 from machine import reset as __soft_reset
 import gc
 
@@ -46,7 +46,7 @@ def _on_boot_(app_name=None, *app_args, **app_kws):
     # hal_led.init()
     # hal_battery.init()
     # >>>> start <<<<
-    usys.path[:] = ['', 'lib', '/', '/lib']
+    usys.path[:] = ['lib', '', '/lib', '/']
     if app_name != None:
         boot_app, args, kws = app_name, app_args, app_kws
     else:
@@ -87,17 +87,17 @@ def render_boot_image():
     if boot_image_path == None:
         import hal_screen
         hal_screen.refresh()
-        boot_image_path = PLAY32_ICON
+        boot_image_path = DEFAULT_BOOT_ICON
     if boot_image_path != "":
         from graphic import framebuf_helper
         import framebuf, hal_screen
-        if boot_image_path == PLAY32_ICON:
-            from resource.image.play32_icon import PLAY32_ICON_DATA
-            iw, ih, idata = PLAY32_ICON_DATA
-        else:
+        if exist(boot_image_path):
             from graphic import pbm
             with open(boot_image_path, 'rb') as ifile:
                 iw, ih, _, idata = pbm.read_image(ifile)[:4]
+        else:
+            from buildin_resource.image.play32_icon import PLAY32_ICON_DATA
+            iw, ih, idata = PLAY32_ICON_DATA
         image = framebuf.FrameBuffer(idata, iw, ih, framebuf.MONO_HLSB)
         image = framebuf_helper.ensure_same_format(
             image, 
@@ -135,7 +135,7 @@ def clear_boot_image():
 def reset_and_run_app(app_name, *args, **kws):
     set_boot_app(app_name, *args, **kws)
     if get_boot_image() == None:
-        set_boot_image(PLAY32_ICON)
+        set_boot_image(DEFAULT_BOOT_ICON)
     if render_boot_image():
         disable_boot_image()
     __soft_reset()
