@@ -1,4 +1,4 @@
-from uhttp.url import encode_url_params
+from net.url import encode_url_params
 import usocket
 import ure
 

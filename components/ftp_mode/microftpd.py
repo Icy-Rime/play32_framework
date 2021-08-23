@@ -13,7 +13,7 @@ _MAX_TRANSFER_TIME = const(2000)
 _EPOCH_TIME_DIFFER = const(946684800)
 
 DEBUG = False
-WELCOME_MESSAGE = "Hello, this is Play32."
+WELCOME_MESSAGE = "Hello, this is micropython board."
 OK_250_MESSAGE = "250 OK\r\n"
 FAIL_550_MESSAGE = "550 Failed\r\n"
 NTP_HOST = "ntp.aliyun.com"

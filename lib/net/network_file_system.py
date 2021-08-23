@@ -11,7 +11,7 @@
         print(l, end='')
     f.close()
 '''
-from play32sys.network_block_device import NetworkBlockDevice, ProtocolUDP, ProtocolCache
+from net.network_block_device import NetworkBlockDevice, ProtocolUDP, ProtocolCache
 from uhashlib import sha256
 from ucryptolib import aes
 from utils.hmac import HMAC

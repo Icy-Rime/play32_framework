@@ -3,8 +3,8 @@ from play32sys import app, network_helper
 from hashlib import sha1
 from utils.hmac import HMAC
 from binascii import b2a_base64
-from uhttp import urequests
-from uhttp.url import url_encode, encode_url_params
+from net import urequests
+from net.url import url_encode, encode_url_params
 from utils.time_helper import EPOCH_TIME_DIFFER
 from config import PUBLIC_KEY, PRIVATE_KEY
 # config.py:
