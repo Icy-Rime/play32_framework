@@ -4,7 +4,7 @@ from buildin_resource.image import DEFAULT_BOOT_ICON
 from machine import reset as __soft_reset
 import gc
 
-VERSION = (1, 16, 0)
+VERSION = (1, 17, 0)
 KEY_BOOT_APP = 'bapp'
 KEY_BOOT_APP_PARAMS = 'bappp'
 KEY_BOOT_APP_KEYWORDS = 'bappk'
@@ -148,6 +148,7 @@ def run_app(app_name, *args, **kws):
             del usys.modules["appmain"]
         module = __import__("appmain")
         res = module.main(app_name, *args, **kws)
+        del module
         return res
     finally:
         if "appmain" in usys.modules:
@@ -163,6 +164,7 @@ def call_component(component_name, *args, **kws):
             del usys.modules["appmain"]
         module = __import__("appmain")
         res = module.main(component_name, *args, **kws)
+        del module
         return res
     finally:
         if "appmain" in usys.modules:

@@ -2,14 +2,14 @@
     "files.eol": "\n",
     "python.autoComplete.extraPaths": [
         "lib",
-        "D:\\CODE\\Python\\play32_dev\\lib",
-        "../../Python/play32_dev/lib",
-        "../../Python/play32_dev",
+        "D:\\CODE\\Python\\play32-dev\\lib",
+        "../../Python/play32-dev/lib",
+        "../../Python/play32-dev",
     ],
     "python.analysis.extraPaths": [
         "lib",
-        "D:\\CODE\\Python\\play32_dev\\lib",
-        "../../Python/play32_dev/lib",
-        "../../Python/play32_dev",
+        "D:\\CODE\\Python\\play32-dev\\lib",
+        "../../Python/play32-dev/lib",
+        "../../Python/play32-dev",
     ]
 }

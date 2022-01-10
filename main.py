@@ -20,6 +20,7 @@ if __count >= 2:
     updater._on_enter_recovery_mode_()
 # >>>> main <<<<
 else:
+    del __count
     from play32sys import app
     app._on_boot_()
     # app._on_boot_("txt_reader")
