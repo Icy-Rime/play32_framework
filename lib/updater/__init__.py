@@ -1,61 +1,59 @@
-from updater import path, microftpd
-import network, utime, uos, usys, uhashlib, machine
+from micropython import const
+from play32sys import path, network_helper
+from net import microftpd
+from graphic import framebuf_console, framebuf_helper, abmfont
+import utime, uos, usys, uhashlib, machine
+# screen console
+import hal_screen, hal_keypad
+hal_screen.init()
+hal_keypad.init()
+FONT_8X4 = abmfont.FontDrawSmallAscii()
+WHITE = framebuf_helper.get_white_color(hal_screen.get_format())
+SCR_W, SCR_H = hal_screen.get_size()
+console = framebuf_console.Console(
+    hal_screen.get_framebuffer(), SCR_W, SCR_H,
+    font_draw=FONT_8X4,
+    color=WHITE,
+    display_update_fun=lambda: hal_screen.refresh()
+)
 
 FRAMEMEWORK_PACK_PATH = "/tmp/framework.pack"
 FRAMEMEWORK_PACK_HASH_PATH = "/tmp/framework.pack.sha256"
-TYPE_FILE = 0X00
-TYPE_DIR = 0X01
-BUFFER_SIZE = 4096
-
-def connect_wifi(ssid, passwd, waiting=False):
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    if not wlan.isconnected():
-        wlan.connect(ssid, passwd)
-        while waiting and not wlan.isconnected():
-            pass
-    return wlan
-
-def setup_ap(ssid="Play32AP", passwd="12345678"):
-    ap = network.WLAN(network.AP_IF)
-    ap.active(True)
-    ap.config(dhcp_hostname="play32")
-    ap.config(essid=ssid)
-    ap.config(max_clients=16)
-    ap.config(hidden=False)
-    if passwd == None or passwd == "":
-        ap.config(authmode=network.AUTH_OPEN)
-    else:
-        ap.config(password=passwd)
-        ap.config(authmode=network.AUTH_WPA_WPA2_PSK)
-    return ap
+TYPE_FILE = const(0X00)
+TYPE_DIR = const(0X01)
+BUFFER_SIZE = const(4096)
 
 def start_ftp():
-    ap = setup_ap("Play32AP", "12345678")
+    ap = network_helper.ap("Play32AP", "12345678")
     utime.sleep(1.0)
     ip = ap.ifconfig()[0]
     ftp = microftpd.FTPServer(ip)
     ftp.init()
     print("Connect to WIFI: Play32AP")
+    console.log("Connect to WIFI: Play32AP")
     print("with password: 12345678")
+    console.log("with password: 12345678")
     print("FTP started at {}:21".format(ip))
+    console.log("FTP started at {}:21".format(ip))
+    print("")
+    console.log("")
+    print("Put framework.pack and sha256 file into /tmp .")
+    console.log("Put framework.pack and sha256 file into /tmp .")
+    print("Press A+B to update.")
+    console.log("Press A+B to update.")
+    is_key_pressed = hal_keypad.is_key_pressed
+    KEY_A = hal_keypad.KEY_A
+    KEY_B = hal_keypad.KEY_B
     while True:
-        try:
-            ftp.loop()
-        except KeyboardInterrupt:
-            return
-        except Exception as e:
-            usys.print_exception(e)
-
-def start_ftp_on(ssid, passwd):
-    print("Connecting WIFI...")
-    wifi = connect_wifi(ssid, passwd, True)
-    utime.sleep(1.0)
-    ip = wifi.ifconfig()[0]
-    ftp = microftpd.FTPServer(ip)
-    ftp.init()
-    print("FTP started at {}:21".format(ip))
-    while True:
+        # key event
+        if is_key_pressed(KEY_A) and is_key_pressed(KEY_B):
+            try:
+                if update_framework():
+                    machine.reset()
+            except:
+                print("update failed. Please check your framework pack.")
+                console.log("update failed. Please check your framework pack.")
+        # serve ftp
         try:
             ftp.loop()
         except KeyboardInterrupt:
@@ -97,12 +95,14 @@ def __process_next_file_entry(dio, verbose=False):
     if file_type == TYPE_DIR:
         if verbose:
             print("DIR: {}".format(file_name))
+            console.log("DIR: {}".format(file_name))
         try:
             uos.mkdir(file_name)
         except: pass
     else:
         if verbose:
             print("FILE: {} SIZE: {}".format(file_name, file_content_length))
+            console.log("FILE: {} SIZE: {}".format(file_name, file_content_length))
         with open(file_name, "wb") as f:
             count = 0
             buffer = bytearray(BUFFER_SIZE)
@@ -126,14 +126,19 @@ def unpack_update_packet(verbose=False):
 
 def update_framework():
     print("Checking file sha256 checksum...")
+    console.log("Checking file sha256 checksum...")
     if not check_update_file():
         print("Update files not correct.")
-        return
+        console.log("Update files not correct.")
+        return False
     print("Cleaning old files...")
+    console.log("Cleaning old files...")
     clear_root_dir()
     print("Unpacking files...")
+    console.log("Unpacking files...")
     unpack_update_packet(True)
     print("Updated.")
+    console.log("Updated.")
     return True
 
 def _on_enter_recovery_mode_():

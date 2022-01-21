@@ -1,7 +1,8 @@
 from play32sys import network_helper
+from net import microftpd
 import hal_keypad, hal_screen
 from graphic import framebuf_helper
-import microftpd, utime
+import utime
 COLOR_WHITE = framebuf_helper.get_white_color(hal_screen.get_format())
 
 class ScropedFTPClientInterface(microftpd.DefaultClientInterface):

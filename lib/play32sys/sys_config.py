@@ -5,8 +5,11 @@ def init():
     import ujson
     from play32sys import path
     __p = path.join(path.get_data_path(), "sys_config.json")
-    with open(__p, "rb") as f:
-        __json = ujson.load(f)
+    try:
+        with open(__p, "rb") as f:
+            __json = ujson.load(f)
+    except:
+        __json = {}
     del __p
 
 def get_sys_config(key, default_value=None):
