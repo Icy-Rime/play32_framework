@@ -21,10 +21,14 @@ if __count >= 2:
 # >>>> main <<<<
 else:
     del __count
-    from play32sys import app
-    app._on_boot_()
-    # app._on_boot_("txt_reader")
-    pass
+    try:
+        from play32sys import app
+        app._on_boot_()
+        pass
+    except Exception as e:
+        import usys, updater
+        usys.print_exception(e)
+        updater._on_enter_recovery_mode_()
 print("==== End Main ====")
 
 # test below

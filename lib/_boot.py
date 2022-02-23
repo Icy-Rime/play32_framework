@@ -11,11 +11,24 @@ except OSError:
     vfs = inisetup.setup()
 
 import usys, esp, machine, micropython
-usys.path[:] = ['', 'lib', '/', '/lib']
+# framework_debug
+def _exist(pt):
+    try:
+        return uos.stat(pt)
+    except OSError:
+        return False
+if _exist("/framework_debug"):
+    usys.path[:] = ['lib', '', '/lib', '/']
+    try:
+        import boot, main
+    except Exception as e:
+        usys.print_exception(e)
+    usys.exit(0)
+usys.path[:] = ['.frozen', 'lib', '', '/lib', '/']
 esp.osdebug(None)
 machine.freq(240000000)
 micropython.alloc_emergency_exception_buf(100)
-del bdev, uos, usys, esp, machine, micropython
+del bdev, _exist, uos, usys, esp, machine, micropython
 gc.collect()
 del gc
 

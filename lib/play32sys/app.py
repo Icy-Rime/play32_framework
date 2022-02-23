@@ -46,7 +46,7 @@ def _on_boot_(app_name=None, *app_args, **app_kws):
     # hal_led.init()
     # hal_battery.init()
     # >>>> start <<<<
-    usys.path[:] = ['lib', '', '/lib', '/']
+    usys.path[:] = ['.frozen', 'lib', '', '/lib', '/']
     if app_name != None:
         boot_app, args, kws = app_name, app_args, app_kws
     else:
