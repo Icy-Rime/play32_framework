@@ -39,9 +39,6 @@ def get_framebuffer():
     return __frame
 
 def refresh(x=0, y=0, w=SCREEN_WIDTH, h=SCREEN_HEIGHT):
-    if isinstance(x, dict) and isinstance(y, list):
-        context = x
-        effect_area = y
     if SCREEN_DRIVER == "ssd1306":
         if w * 100 >= SCREEN_WIDTH * 75 and h * 100 >= SCREEN_HEIGHT * 75:
             __screen.show()

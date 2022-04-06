@@ -1,9 +1,9 @@
 # This file is executed on every boot (including wake-boot from deepsleep)
 import usys, esp, machine, micropython
-usys.path[:] = ['lib', '', '/lib', '/']
+usys.path[:] = ['lib', '', '/lib', '/', '.frozen']
 esp.osdebug(None)
 machine.freq(240000000)
 micropython.alloc_emergency_exception_buf(100)
-del sys, esp, machine, micropython
+del esp, machine, micropython
 #import webrepl
 #webrepl.start()

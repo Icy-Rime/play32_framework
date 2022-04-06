@@ -18,7 +18,7 @@ def _exist(pt):
     except OSError:
         return False
 if _exist("/framework_debug"):
-    usys.path[:] = ['lib', '', '/lib', '/']
+    usys.path[:] = ['lib', '', '/lib', '/', '.frozen']
     try:
         import boot, main
     except Exception as e:
