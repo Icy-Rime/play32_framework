@@ -49,6 +49,8 @@ def _draw_char_one_by_one(frame, text, x:int, y:int, color, width_limit:int, hei
             moved_y += font_height
             moved_x = x
         if height_limit > 0 and (moved_y + font_height - y > height_limit):
+            if unicode == ASCII_N:
+                count += 1 # new line
             return count
         count += 1
         if unicode == ASCII_T or unicode == ASCII_N or unicode == ASCII_R:
@@ -139,6 +141,8 @@ def get_text_count(text, width_limit:int, height_limit:int, font_width:int, font
             moved_y += font_height
             moved_x = 0
         if height_limit > 0 and (moved_y + font_height > height_limit):
+            if unicode == ASCII_N:
+                count += 1 # new line
             return count
         count += 1
         if unicode == ASCII_T or unicode == ASCII_N or unicode == ASCII_R:
