@@ -3,8 +3,10 @@ from play32hw import cpu
 from micropython import const
 from machine import lightsleep
 import uos
-import hal_screen, hal_keypad, hal_battery
+import hal_screen, hal_keypad, hal_battery, hal_sdcard
 import book_reader, book_ui
+from ui.select_file import select_file
+from ui.dialog import dialog
 
 CPU_CONTEXT_FAST = cpu.cpu_speed_context(cpu.FAST)
 CPU_CONTEXT_SLOW = cpu.cpu_speed_context(cpu.FAST)
@@ -25,20 +27,26 @@ def main(app_name, *args, **kws):
     hal_screen.init()
     hal_keypad.init()
     hal_battery.init()
+    hal_sdcard.init()
+    hal_sdcard.mount()
     reader = book_reader.BookReader(SIZE_COMMIT_AFTER_FLIP)
-    book_ui.render_message("加载书签")
     # 加载文件
     data_dir = path.get_data_path(app_name)
     if not path.exist(data_dir):
         path.mkdirs(data_dir)
     txt_file_path = None
-    for info in uos.ilistdir(data_dir):
-        f_name = info[0]
-        if f_name.endswith(".txt") or f_name.endswith(".TXT"):
-            txt_file_path = path.join(data_dir, f_name)
+    while txt_file_path == None:
+        pth = select_file(data_dir, "Text Reader", f_dir=False)
+        if len(pth) < 1:
+            dialog("Please select a text file.")
+        if pth.endswith(".txt") or pth.endswith(".TXT"):
+            txt_file_path = pth
+        else:
+            dialog("Please select a .txt file.")
     if txt_file_path == None:
         book_ui.render_message("找不到文本文件")
         return
+    book_ui.render_message("加载书签")
     reader.load_book(txt_file_path)
     # 进入主循环
     reader.render()
