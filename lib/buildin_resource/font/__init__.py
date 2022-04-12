@@ -4,13 +4,14 @@ __font_16 = None
 def get_font_8px():
     global __font_8
     if __font_8 == None:
+        from graphic import ubmfont
         try:
-            from graphic import ubmfont
             f = open('/resource/font/pix8x8.ufnt', "rb")
-            __font_8 = ubmfont.FontDrawUnicode(f)
         except:
-            from graphic import bmfont
-            __font_8 = bmfont.FontDrawAscii()
+            from buildin_resource.font.fallback8x8 import data
+            from buildin_resource import BytesStream
+            f = BytesStream(data)
+        __font_8 = ubmfont.FontDrawUnicode(f)
     return __font_8
 
 def get_font_16px():
