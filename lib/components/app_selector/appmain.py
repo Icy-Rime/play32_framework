@@ -64,7 +64,7 @@ def get_app_info(app_name):
             assert (w, h) == (ICON_SIZE_W, ICON_SIZE_H)
         return display_name, icon_path, framebuf.FrameBuffer(data, w, h, framebuf.MONO_HLSB)
     except:
-        return display_name, DEFAULT_ICON_PATH, framebuf.FrameBuffer(bytearray(DEFAULT_ICON_DATA), w, h, framebuf.MONO_HLSB)
+        return display_name, DEFAULT_ICON_PATH, framebuf.FrameBuffer(bytearray(DEFAULT_ICON_DATA), 48, 48, framebuf.MONO_HLSB)
 
 def render_point_app():
     frame = hal_screen.get_framebuffer()
