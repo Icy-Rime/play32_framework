@@ -1,5 +1,6 @@
 from graphic import framebuf_helper, pbm
 from play32sys import path, app, battery
+from play32sys.sys_config import get_sys_config
 from play32hw import cpu
 import ujson, uos, framebuf
 import hal_screen, hal_keypad, hal_battery, hal_sdcard
@@ -15,16 +16,14 @@ FONT_8 = get_font_8px()
 SCR_W, SCR_H = hal_screen.get_size()
 FNT_W, FNT_H = FONT_8.get_font_size()
 ICON_SIZE_W, ICON_SIZE_H = (48, 48)
-THIS_APP_NAME = "app_selector"
 DEFAULT_ICON_PATH = "images/fallback_icon.pbm"
+DEFAULT_ICON_DATA = b'\x00\x00\x00\x00\x00\x00\x00\x00\x0f\x00\x00\x00\x00\x00\xf0\xf0\x00\x00\x00\x03\x00\x0c\x00\x00\x00\x0c\x00\x02\x00\x00\x00\x10\x00\x01\x80\x00\x00 \x00\x00@\x00\x00@\x00\x00 \x00\x00@\x00\x00 \x00\x00\x80\x00\x00\x10\x00\x01\x00\x00\x00\x00\x00\x01\x00\x00\x00x\x00\x01\x00\x00\x00\xff\x80\x02\x00\x00\x01\xff\x80\x02\x00\x00\x01\xff\x80\x02\x00\x11\x03\xff\x80\x02\x00+\x87\xff\x80\x02\x00\'\x8f\xff\x00\x02\x00G\x9f\xff\x00\x02\x00\'\xbf\xff\x00\x02\x00\'\xff\xfc\x00\x02\x07\x97\xff\xe0\x00\x02\x07\xef\xff\x80\x00\x01\x03\xff\xff\xf0\x00\x01\x01\xff\xfe\x10\x00\x00\x80\x7f\xe0 \x00\x00\x80\xff\xff\xfc\x00\x00A\x7f\xff\xfe\x00\x00#\xff\xff\xfe\x00\x00\x10\x7f\xff\xff\x00\x00\x0c\xff\xff\xff\x80\x00\x01\xf9\xff\xff\x80\x00\x03\xf9\xfb\xff\xc0\x00\x03\xf9\xf9\xff\xc0\x00\x03\xf9\xf8\x7f\xe0\x00\x03\xf0\xf0\x00\x00\x00\x03\x800\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\xe4\r\x17\x8e\x00\x01\x94\x14\xa0\x92\x00\x00\xa4\x14\xe1\x02\x00\x00\xc4>#\xc4\x00\x00\x84" L\x00\x00\x87\xa2\xe0\x91\x80\x00\x00"\x03\x1f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 MAX_NAME_LENGTH = (SCR_W - 2*FNT_W) // FNT_W
 app_list = []
 app_pointer = -1
 
 def main(app_name, *args, **kws):
     # init
-    global THIS_APP_NAME
-    THIS_APP_NAME = app_name
     hal_screen.init()
     hal_keypad.init()
     hal_battery.init()
@@ -36,8 +35,7 @@ def main(app_name, *args, **kws):
     # end
 
 def init():
-    global DEFAULT_ICON_PATH
-    DEFAULT_ICON_PATH = path.join(path.get_component_path(THIS_APP_NAME), "images", "fallback_icon.pbm")
+    pass
 
 def load_app_list():
     global app_list, app_pointer
@@ -45,8 +43,7 @@ def load_app_list():
     for info in uos.ilistdir(path.get_app_path("/")):
         file_name = info[0]
         file_type = info[1]
-        if (file_type == path.FILE_TYPE_DIR) and (file_name != THIS_APP_NAME):
-            app_list.append(file_name)
+        app_list.append(file_name)
     app_list.sort()
     if len(app_list) <= 0:
         app_pointer = -1
@@ -67,9 +64,7 @@ def get_app_info(app_name):
             assert (w, h) == (ICON_SIZE_W, ICON_SIZE_H)
         return display_name, icon_path, framebuf.FrameBuffer(data, w, h, framebuf.MONO_HLSB)
     except:
-        with open(DEFAULT_ICON_PATH, "rb") as f:
-            w, h, _, data, _ = pbm.read_image(f)
-        return display_name, DEFAULT_ICON_PATH, framebuf.FrameBuffer(data, w, h, framebuf.MONO_HLSB)
+        return display_name, DEFAULT_ICON_PATH, framebuf.FrameBuffer(bytearray(DEFAULT_ICON_DATA), w, h, framebuf.MONO_HLSB)
 
 def render_point_app():
     frame = hal_screen.get_framebuffer()
@@ -117,7 +112,10 @@ def run_app():
         return
     app_name = app_list[app_pointer]
     _, display_icon_path, _ = get_app_info(app_name)
-    app.set_boot_image(display_icon_path)
+    if display_icon_path == DEFAULT_ICON_PATH:
+        app.clear_boot_image()
+    else:
+        app.set_boot_image(display_icon_path)
     app.reset_and_run_app(app_name)
 
 def main_loop():
@@ -130,7 +128,8 @@ def main_loop():
     KEY_A = hal_keypad.KEY_A
     KEY_B = hal_keypad.KEY_B
     t_update_battery_ms = ticks_ms()
-    cpu.set_cpu_speed(cpu.VERY_SLOW)
+    if not path.exist("/framework_debug") and not get_sys_config("debug"):
+        cpu.set_cpu_speed(cpu.VERY_SLOW)
     while True:
         should_refresh_screen = False
         for event in get_key_event():

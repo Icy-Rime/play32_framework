@@ -7,7 +7,6 @@ __ROOT_BASE = '/'
 __APP_BASE = '/apps'
 __DATA_BASE = '/data'
 __TMP_BASE = '/tmp'
-__COMPONENT_BASE = '/components'
 
 class TemporaryFileContext():
     def __init__(self, path):
@@ -91,12 +90,6 @@ def get_tmp_path(name='/'):
         return __TMP_BASE
     else:
         return join(__TMP_BASE, name)
-
-def get_component_path(name='/'):
-    if name == '/':
-        return __COMPONENT_BASE
-    else:
-        return join(__COMPONENT_BASE, name)
 
 def open_temporary_file(path):
     return TemporaryFileContext(path)

@@ -26,9 +26,8 @@ else:
         app._on_boot_()
         pass
     except Exception as e:
-        import usys, updater
+        import usys
         usys.print_exception(e)
-        updater._on_enter_recovery_mode_()
 print("==== End Main ====")
 
 # test below

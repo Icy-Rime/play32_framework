@@ -11,15 +11,17 @@ def sync_time():
 def connect(waiting=False):
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
-    if not wlan.isconnected():
-        wlan.connect(get_sys_config('wifi_ssid'), get_sys_config('wifi_pass'))
-        while waiting and not wlan.isconnected():
-            pass
+    ssid = get_sys_config('wifi_ssid')
+    passwd = get_sys_config('wifi_pass')
+    if ssid != None and passwd != None:
+        if not wlan.isconnected():
+            wlan.connect(ssid, passwd)
+    while waiting and not wlan.isconnected():
+        pass
     return wlan
 
 def ap(ssid="Play32AP", passwd="12345678"):
     ap = network.WLAN(network.AP_IF)
-    ap.active(True)
     ap.config(dhcp_hostname="play32")
     ap.config(essid=ssid)
     ap.config(max_clients=16)
@@ -29,6 +31,7 @@ def ap(ssid="Play32AP", passwd="12345678"):
     else:
         ap.config(password=passwd)
         ap.config(authmode=network.AUTH_WPA_WPA2_PSK)
+    ap.active(True)
     return ap
 
 def deactive_all():

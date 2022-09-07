@@ -1,5 +1,5 @@
 import uos, usys, ujson
-from play32sys.path import join, exist, get_tmp_path, get_app_path, get_component_path, clear_temporary_dir
+from play32sys.path import join, exist, get_tmp_path, get_app_path, clear_temporary_dir
 from buildin_resource.image import DEFAULT_BOOT_ICON
 from machine import reset as __soft_reset
 import gc
@@ -158,18 +158,17 @@ def run_app(app_name, *args, **kws):
 
 def call_component(component_name, *args, **kws):
     curr = uos.getcwd()
-    uos.chdir(get_component_path(component_name))
+    module_name = "components."+component_name+".appmain"
     try:
-        if "appmain" in usys.modules:
-            del usys.modules["appmain"]
-        module = __import__("appmain")
+        module = __import__(module_name)
+        module = getattr(module, component_name)
+        module = getattr(module, "appmain")
         res = module.main(component_name, *args, **kws)
         del module
         return res
     finally:
-        if "appmain" in usys.modules:
-            del usys.modules["appmain"]
-        uos.chdir(curr)
+        if module_name in usys.modules:
+            del usys.modules[module_name]
         gc.collect()
 
 # debug function

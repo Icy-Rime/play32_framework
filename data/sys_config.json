@@ -1,5 +1,6 @@
 {
     "wifi_ssid": "XiaomiHome",
     "wifi_pass": "zhaogf6511",
+    "debug": true,
     "version": 1
 }
