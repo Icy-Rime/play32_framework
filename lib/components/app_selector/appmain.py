@@ -43,7 +43,8 @@ def load_app_list():
     for info in uos.ilistdir(path.get_app_path("/")):
         file_name = info[0]
         file_type = info[1]
-        app_list.append(file_name)
+        if (not file_name.startswith(".")):
+            app_list.append(file_name)
     app_list.sort()
     if len(app_list) <= 0:
         app_pointer = -1
