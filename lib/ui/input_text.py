@@ -138,7 +138,7 @@ class _KBD_TEXT:
     def insert(self, v):
         if len(v) <= 0:
             return
-        self.__text = self.__text[:self.__cursor] + v + self.__text[self.__cursor+1:]
+        self.__text = self.__text[:self.__cursor] + v + self.__text[self.__cursor:]
         self.move_cursor(len(v))
 
     def delete(self):
@@ -246,7 +246,7 @@ class _KBD_PINYIN:
 
 def input_text(text="", title="Edit Text"):
     """ show a dialog and display some text.
-        return True/False
+        return str
     """
     with cpu_speed_context(VERY_SLOW):
         for v in input_text_gen(text, title):
