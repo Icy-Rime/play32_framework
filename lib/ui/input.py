@@ -2,8 +2,7 @@ import hal_screen, hal_keypad
 from hal_keypad import parse_key_event, KEY_A, KEY_B, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, EVENT_KEY_PRESS
 from graphic.framebuf_helper import get_white_color
 from buildin_resource.font import get_font_8px
-from ui.utils import draw_buttons_at_last_line, draw_label_header
-from machine import lightsleep
+from ui.utils import draw_buttons_at_last_line, draw_label_header, sleep_save_power
 from play32hw.cpu import cpu_speed_context, VERY_SLOW, FAST
 
 def input_slide(title="", text_yes="OK", text_no="CANCEL", slide_start = 0, slide_size = 100):
@@ -14,7 +13,7 @@ def input_slide(title="", text_yes="OK", text_no="CANCEL", slide_start = 0, slid
         for v in input_slide_gen(title, text_yes, text_no, slide_start, slide_size):
             if v != None:
                 return v
-            lightsleep(33) # save power
+            sleep_save_power() # save power
 
 def input_slide_gen(title="", text_yes="OK", text_no="CANCEL", slide_start = 0, slide_size = 100):
     assert slide_start >= 0

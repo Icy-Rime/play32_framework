@@ -1,4 +1,7 @@
 from graphic.bmfont import get_text_count
+from machine import lightsleep
+
+sleep_time_ms = 15
 
 class PagedText:
     def __init__(self, text, area_w, area_h, font_w, font_h, scroll_bar=None, style_inline=False):
@@ -159,3 +162,10 @@ def draw_buttons_at_last_line(frame, frame_w, frame_h, font_draw, color_white, t
     else:
         draw_button(frame, 0, base_y, frame_w // 2 - 1, FH, font_draw, color_white, text_no)
         draw_button(frame, frame_w // 2 + 1, base_y, frame_w // 2 - 1, FH, font_draw, color_white, text_yes)
+
+def sleep_save_power():
+    lightsleep(sleep_time_ms)
+
+def set_sleep_time(val_ms):
+    global sleep_time_ms
+    sleep_time_ms = val_ms

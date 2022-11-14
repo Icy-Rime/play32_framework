@@ -2,8 +2,7 @@ import hal_screen, hal_keypad
 from hal_keypad import parse_key_event, KEY_A, KEY_B, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, EVENT_KEY_PRESS
 from graphic.framebuf_helper import get_white_color
 from buildin_resource.font import get_font_8px
-from ui.utils import PagedText, draw_buttons_at_last_line, draw_label_header
-from machine import lightsleep
+from ui.utils import PagedText, draw_buttons_at_last_line, draw_label_header, sleep_save_power
 from play32hw.cpu import cpu_speed_context, VERY_SLOW, FAST
 
 def dialog(text="", title="", text_yes="OK", text_no="OK"):
@@ -14,7 +13,7 @@ def dialog(text="", title="", text_yes="OK", text_no="OK"):
         for v in dialog_gen(text, title, text_yes, text_no):
             if v != None:
                 return v
-            lightsleep(33) # save power
+            sleep_save_power() # save power
 
 def dialog_gen(text="", title="", text_yes="OK", text_no="OK"):
     WHITE = get_white_color(hal_screen.get_format())

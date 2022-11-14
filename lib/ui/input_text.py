@@ -11,8 +11,7 @@ import hal_screen, hal_keypad
 from hal_keypad import parse_key_event, KEY_A, KEY_B, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, EVENT_KEY_PRESS
 from graphic.framebuf_helper import get_white_color
 from buildin_resource.font import get_font_8px
-from ui.utils import draw_label_nav, draw_label_header, draw_button, draw_label_invert
-from machine import lightsleep
+from ui.utils import draw_label_nav, draw_label_header, draw_button, draw_label_invert, sleep_save_power
 from play32hw.cpu import cpu_speed_context, VERY_SLOW, FAST
 from ui._input_method import InputMethod
 from ui.select import select_list_gen
@@ -252,7 +251,7 @@ def input_text(text="", title="Edit Text"):
         for v in input_text_gen(text, title):
             if v != None:
                 return v
-            lightsleep(15) # save power
+            sleep_save_power() # save power
 
 def input_text_gen(text="", title="Edit Text"):
     # test
