@@ -74,6 +74,11 @@ def clone_framebuffer(frame, w, h, format):
     __copy(frame.pixel, target_frame.pixel, w, h)
     return target_frame
 
+def crop_framebuffer(frame, x, y, w, h, format):
+    new_frame = new_framebuffer(w, h, format)
+    new_frame.blit(frame, -x, -y)
+    return new_frame
+
 def get_framebuffer_info(frame):
     assert type(frame) == framebuf.FrameBuffer
     frame_address = id(frame)
