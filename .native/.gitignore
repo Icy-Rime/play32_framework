@@ -1,8 +1,11 @@
-/font/**
-!/font/make_font_dinkie_8x8.py
-!/font/make_font_guanzhi_4x8.py
-!/font/make_font_guanzhi_8x8.py
-!/font/make_font_unifont_16x16.py
-!/font/make_font_sourcehan_16x16.py
+/font/*.ttf
+/font/*.png
+/font/*.ufnt
+# !/font/make_font_dinkie_8x8.py
+# !/font/make_font_guanzhi_4x8.py
+# !/font/make_font_guanzhi_8x8.py
+# !/font/make_font_quan_8x8.py
+# !/font/make_font_unifont_16x16.py
+# !/font/make_font_sourcehan_16x16.py
 # !/font/SourceHanSansSC-VF.ttf
-!/font/README.md
+# !/font/README.md
