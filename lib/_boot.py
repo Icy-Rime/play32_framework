@@ -1,14 +1,17 @@
 import gc
 import uos
-from flashbdev import bdev
 
 try:
-    if bdev:
-        uos.mount(bdev, "/")
-except OSError:
-    import inisetup
+    # esp32 setup
+    from flashbdev import bdev
+    try:
+        if bdev:
+            uos.mount(bdev, "/")
+    except OSError:
+        import inisetup
 
-    vfs = inisetup.setup()
+        vfs = inisetup.setup()
+except: pass
 
 # main.py
 def main():
@@ -42,9 +45,18 @@ def main():
         except Exception as e:
             import usys
             usys.print_exception(e)
+            text = str(e)
+            del e
+            gc.collect()
+            import hal_screen
+            hal_screen.init()
+            from ui.dialog import dialog
+            dialog(text, "Error")
+            from play32sys import app
+            app.reset_and_run_app("")
     print("==== End Main ====")
 
-import usys, esp, machine, micropython
+import usys, micropython
 # framework_debug
 def _exist(pt):
     try:
@@ -53,8 +65,6 @@ def _exist(pt):
         return False
 if not _exist("/framework_debug"):
     usys.path[:] = ['.frozen', 'lib', '', '/lib', '/']
-    esp.osdebug(None)
-    machine.freq(240000000)
     micropython.alloc_emergency_exception_buf(100)
     gc.collect()
     main() # main function
