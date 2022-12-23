@@ -15,7 +15,6 @@ FRAMEBUFFER_OBJECT = {
     "format": (18 | UINT8),
 }
 
-@micropython.viper
 def color565(r:int, g:int, b:int) -> int:
     """Return RGB565 color value.
 
@@ -26,7 +25,6 @@ def color565(r:int, g:int, b:int) -> int:
     """
     return (r & 0xf8) << 8 | (g & 0xfc) << 3 | b >> 3
 
-@micropython.viper
 def __copy_with_color(get_pixel, set_pixel, size, color:int):
     w = int(size[0])
     h = int(size[1])
@@ -36,7 +34,6 @@ def __copy_with_color(get_pixel, set_pixel, size, color:int):
             tc:int = color if sc > 0 else 0
             set_pixel(x, y, tc)
 
-@micropython.viper
 def __copy(get_pixel, set_pixel, w:int, h:int):
     for x in range(w):
         for y in range(h):

@@ -10,7 +10,6 @@ ASCII_N = const(10)
 ASCII_R = const(13)
 
 # UNIVERSAL
-@micropython.viper
 def _draw_char_one_by_one(frame, text, x:int, y:int, color, width_limit:int, height_limit:int, font_width:int, font_height:int, draw_char_on) -> int:
     if (width_limit > 0 and width_limit < font_width) or (height_limit > 0 and height_limit < font_height):
         return 0
@@ -19,7 +18,7 @@ def _draw_char_one_by_one(frame, text, x:int, y:int, color, width_limit:int, hei
     count:int = 0
     u8d = text.encode('utf-8')
     length:int = int(len(u8d))
-    string:ptr8 = ptr8(u8d)
+    string = u8d
     tpoint: int = 0
     frame_pixel = frame.pixel
     while tpoint < length:
@@ -60,7 +59,6 @@ def _draw_char_one_by_one(frame, text, x:int, y:int, color, width_limit:int, hei
         moved_x += font_width
     return count
 
-@micropython.viper
 def get_text_line(text, width_limit:int, size:int) -> int:
     if width_limit < size:
         return 0
@@ -69,7 +67,7 @@ def get_text_line(text, width_limit:int, size:int) -> int:
     lines:int = 1
     u8d = text.encode('utf-8')
     length:int = int(len(u8d))
-    string:ptr8 = ptr8(u8d)
+    string = u8d
     tpoint: int = 0
     while tpoint < length:
         # get unicode char
@@ -103,7 +101,6 @@ def get_text_line(text, width_limit:int, size:int) -> int:
         moved_x += size
     return lines
 
-@micropython.viper
 def get_text_count(text, width_limit:int, height_limit:int, font_width:int, font_height:int) -> int:
     if (width_limit > 0 and width_limit < font_width) or (height_limit > 0 and height_limit < font_height):
         return 0
@@ -112,7 +109,7 @@ def get_text_count(text, width_limit:int, height_limit:int, font_width:int, font
     count:int = 0
     u8d = text.encode('utf-8')
     length:int = int(len(u8d))
-    string:ptr8 = ptr8(u8d)
+    string = u8d
     tpoint: int = 0
     while tpoint < length:
         # get unicode char
@@ -158,7 +155,6 @@ class FontDraw():
         raise NotImplementedError()
 
 # ASCII
-@micropython.viper
 def _ascii_draw_char_on(frame, _, unicode:int, x:int, y:int, color):
     if unicode <32 or unicode > 127:
         return

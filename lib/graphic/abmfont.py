@@ -5,16 +5,14 @@ ASCII_4X8_VLSB = b'\x00/\x00\x00\x03\x00\x03\x00?\x12?\x00\x16?\x1a\x00\x12\x08$
 ASCII_DATA_START = const(0X21)
 ASCII_DATA_END = const(0x7E)
 
-@micropython.viper
 def _small_ascii_draw_char_on(_, frame_pixel, unicode:int, x:int, y:int, color):
     if unicode < ASCII_DATA_START or unicode > ASCII_DATA_END:
         return
     data_offset:int = (unicode - ASCII_DATA_START) * 4
-    ascii_data:ptr8 = ptr8(ASCII_4X8_VLSB)
     xp:int = x
     yp:int = y
     for i in range(data_offset, data_offset+4):
-        vdata:int = int(ascii_data[i])
+        vdata:int = int(ASCII_4X8_VLSB[i])
         yp = y
         for bit in range(8):
             pat:int = 0b1 << bit

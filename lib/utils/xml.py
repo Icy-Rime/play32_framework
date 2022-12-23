@@ -31,11 +31,10 @@ CHAR_SLASH = const(0x2F) # /
 CHAR_EQUAL = const(0x3D) # =
 CHAR_QUOTE = const(0x22) # "
 
-@micropython.viper
 def xml_parse_token(read_func, buffer_size:int):
     # return [(token_type_and_depth, token_offset, token_size), ...]
     buffer_pointer:int = buffer_size
-    buffer:ptr8 = ptr8(b"")
+    buffer = b""
     lst = []
     offset:int = 0
     depth:int = 0
@@ -49,7 +48,7 @@ def xml_parse_token(read_func, buffer_size:int):
             tmp_bytes = read_func(buffer_size)
             buffer_size = int(len(tmp_bytes))
             buffer_pointer = 0
-            buffer = ptr8(tmp_bytes)
+            buffer = tmp_bytes
         if buffer_pointer >= buffer_size:
             return lst
         ch:int = buffer[buffer_pointer]

@@ -27,7 +27,6 @@ class FontDrawUnicode(FontDraw):
             self.__area_size.append(size)
 
     # @timed_function
-    @micropython.viper
     def _unicode_draw_char_on(self, frame, unicode:int, x:int, y:int, color):
         if unicode > 0xFFFF:
             return
@@ -41,7 +40,7 @@ class FontDrawUnicode(FontDraw):
         area_size:int = int(self.__area_size[area])
         offset:int = int(area_offset * (font_data_size + 1)) + BASE_OFFSET
         seek(offset)
-        pos_lst = ptr8(read(area_size))
+        pos_lst = read(area_size)
         data_not_found = True
         data = b''
         for i in range(area_size):
@@ -56,7 +55,7 @@ class FontDrawUnicode(FontDraw):
             # not found
             return
         # draw on frame
-        font_data = ptr8(data)
+        font_data = data
         pixel = frame.pixel
         xp:int = x
         yp:int = y
