@@ -13,7 +13,7 @@ class ScropedFTPClientInterface(microftpd.DefaultClientInterface):
             return True
         return False
 
-def main(app_name, *args, **kws):
+def main():
     hal_screen.init()
     hal_keypad.init()
     network_helper.deactive_all()

@@ -6,6 +6,7 @@ import ujson, uos, framebuf
 import hal_screen, hal_keypad, hal_battery, hal_sdcard
 from utime import ticks_ms, ticks_diff, ticks_add
 from buildin_resource.font import get_font_8px
+from components.app_selector import settings
 
 MANIFEST_FILE = "manifest.json"
 MANIFEST_KEY_NAME = "name"
@@ -22,7 +23,7 @@ MAX_NAME_LENGTH = (SCR_W - 2*FNT_W) // FNT_W
 app_list = []
 app_pointer = -1
 
-def main(app_name, *args, **kws):
+def main():
     # init
     hal_screen.init()
     hal_keypad.init()
@@ -159,16 +160,14 @@ def main_loop():
                         hal_sdcard.init()
                         hal_sdcard.mount()
                         gc.collect()
-                        app.call_component("ftp_mode")
+                        settings.main()
                         gc.collect()
                         load_app_list()
                         render_point_app()
                         render_battery_level()
                         t_update_battery_ms = ticks_ms()
                         should_refresh_screen = True
-                        import gc
                         gc.collect()
-                        # app.reset_and_run_app("") # reset
         if ticks_diff(ticks_ms(), t_update_battery_ms) >= 500:
             t_update_battery_ms = ticks_add(t_update_battery_ms, 500)
             with cpu.cpu_speed_context(cpu.FAST):

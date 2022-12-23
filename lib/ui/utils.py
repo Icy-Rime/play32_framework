@@ -1,7 +1,7 @@
 from graphic.bmfont import get_text_count
 from play32hw.cpu import sleep
 
-sleep_time_ms = 15
+sleep_time_ms = 0
 
 class PagedText:
     def __init__(self, text, area_w, area_h, font_w, font_h, scroll_bar=None, style_inline=False):
@@ -164,7 +164,8 @@ def draw_buttons_at_last_line(frame, frame_w, frame_h, font_draw, color_white, t
         draw_button(frame, frame_w // 2 + 1, base_y, frame_w // 2 - 1, FH, font_draw, color_white, text_yes)
 
 def sleep_save_power():
-    sleep(sleep_time_ms)
+    if sleep_time_ms > 0:
+        sleep(sleep_time_ms)
 
 def set_sleep_time(val_ms):
     global sleep_time_ms

@@ -59,7 +59,8 @@ def _on_boot_(app_name=None, *app_args, **app_kws):
         gc.collect()
         run_app(boot_app, *args, **kws)
     else:
-        call_component('app_selector')
+        from components.app_selector import appmain as app_selector
+        app_selector.main()
 
 # app function
 def get_boot_app():
@@ -154,21 +155,6 @@ def run_app(app_name, *args, **kws):
         if "appmain" in usys.modules:
             del usys.modules["appmain"]
         uos.chdir(curr)
-        gc.collect()
-
-def call_component(component_name, *args, **kws):
-    curr = uos.getcwd()
-    module_name = "components."+component_name+".appmain"
-    try:
-        module = __import__(module_name)
-        module = getattr(module, component_name)
-        module = getattr(module, "appmain")
-        res = module.main(component_name, *args, **kws)
-        del module
-        return res
-    finally:
-        if module_name in usys.modules:
-            del usys.modules[module_name]
         gc.collect()
 
 # debug function

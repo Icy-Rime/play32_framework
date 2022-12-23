@@ -14,7 +14,6 @@ def connect(waiting=False):
     ssid = get_sys_config('wifi_ssid')
     passwd = get_sys_config('wifi_pass')
     wlan.config(dhcp_hostname=get_sys_config("hostname", "play32"))
-    print("hostname:", get_sys_config("hostname", "play32"))
     if ssid != None and passwd != None:
         if not wlan.isconnected():
             wlan.connect(ssid, passwd)
@@ -24,7 +23,7 @@ def connect(waiting=False):
 
 def ap(ssid="Play32AP", passwd="12345678"):
     ap = network.WLAN(network.AP_IF)
-    ap.config(dhcp_hostname="play32")
+    ap.config(dhcp_hostname=get_sys_config("hostname", "play32"))
     ap.config(essid=ssid)
     ap.config(max_clients=16)
     ap.config(hidden=False)
