@@ -1,83 +1,40 @@
+from play32hw.hw_config import get_model, MODEL_INITIAL, MODEL_EMULATOR
 
-from machine import Pin, DEEPSLEEP, SLEEP
-from play32hw.hw_config import PIN_KEY_A, PIN_KEY_B, PIN_KEY_UP, PIN_KEY_DOWN, PIN_KEY_LEFT, PIN_KEY_RIGHT
-import esp32
+if get_model() == MODEL_INITIAL:
+    from play32hw.pinitial.hal_keypad import *
+elif get_model() == MODEL_EMULATOR:
+    from play32hw.pemulator.hal_keypad import *
+else:
+    KEY_A = 0x00
+    KEY_B = 0x01
+    KEY_UP = 0x02
+    KEY_DOWN = 0x03
+    KEY_LEFT = 0x04
+    KEY_RIGHT = 0x05
 
-KEY_A = 0x00
-KEY_B = 0x01
-KEY_UP = 0x02
-KEY_DOWN = 0x03
-KEY_LEFT = 0x04
-KEY_RIGHT = 0x05
+    EVENT_KEY_PRESS = 0x00
+    EVENT_KEY_RELEASE = 0x10
 
-EVENT_KEY_PRESS = 0x00
-EVENT_KEY_RELEASE = 0x10
+    def init():
+        pass
 
-__keypad = None
-__key_status = [False, False, False, False, False, False]
-__key_name = "ABUDLR"
+    def get_key_value(key):
+        # type: (int) -> int
+        return 0
 
-def init():
-    # type: () -> None
-    global __keypad
-    if __keypad != None:
-        return
-    t_a = Pin(PIN_KEY_A, Pin.IN, Pin.PULL_UP)
-    t_b = Pin(PIN_KEY_B, Pin.IN, Pin.PULL_UP)
-    t_up = Pin(PIN_KEY_UP, Pin.IN, Pin.PULL_UP)
-    t_dn = Pin(PIN_KEY_DOWN, Pin.IN, Pin.PULL_UP)
-    t_lt = Pin(PIN_KEY_LEFT, Pin.IN, Pin.PULL_UP)
-    t_rt = Pin(PIN_KEY_RIGHT, Pin.IN, Pin.PULL_UP)
-    __keypad = (t_a, t_b, t_up, t_dn, t_lt, t_rt)
+    def get_key_name(key):
+        return "K"
 
-def get_key_value(key):
-    # type: (int) -> int
-    return __keypad[key].value()
+    def get_key_event():
+        # type: () -> list
+        return []
 
-def get_key_name(key):
-    return __key_name[key]
+    def parse_key_event(event):
+        # type: (int) -> tuple
+        return (event & 0xF0, event & 0x0F)
 
-def get_key_event():
-    # type: () -> list
-    events = []
-    for i in range(len(__keypad)):
-        v = get_key_value(i)
-        if __key_status[i] and v > 0:
-            # release
-            __key_status[i] = False
-            # text = str(i) + " RELEASED"
-            # print(text)
-            events.append(EVENT_KEY_RELEASE | i)
-        elif __key_status[i] == False and v == 0:
-            # press
-            __key_status[i] = True
-            # text = str(i) + " PRESSED"
-            # print(text)
-            events.append(EVENT_KEY_PRESS | i)
-        # keep
-    return events
+    def is_key_pressed(key):
+        return get_key_value(key) == 1
 
-def parse_key_event(event):
-    # type: (int) -> tuple
-    return (event & 0xF0, event & 0x0F)
-
-def is_key_pressed(key):
-    return get_key_value(key) == 0
-
-def clear_key_status(keys):
-    for k in keys:
-        __key_status[k] = False
-
-def enable_wake_on_press0(key=None):
-    if key != None:
-        pin = __keypad[key]
-    else:
-        pin = None
-    esp32.wake_on_ext0(pin, esp32.WAKEUP_ALL_LOW)
-
-def enable_wake_on_press1(keys=None):
-    if keys != None:
-        pins = [__keypad[i] for i in keys]
-    else:
-        pins = None
-    esp32.wake_on_ext1(pins, esp32.WAKEUP_ALL_LOW)
+    def clear_key_status(keys):
+        pass

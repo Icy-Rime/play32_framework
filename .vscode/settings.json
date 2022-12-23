@@ -3,13 +3,11 @@
     "python.autoComplete.extraPaths": [
         "lib",
         "D:\\CODE\\Python\\play32-dev\\lib",
-        "../../Python/play32-dev/lib",
-        "../../Python/play32-dev",
+        "../play32-dev/lib",
     ],
     "python.analysis.extraPaths": [
         "lib",
         "D:\\CODE\\Python\\play32-dev\\lib",
-        "../../Python/play32-dev/lib",
-        "../../Python/play32-dev",
+        "../play32-dev/lib",
     ]
 }

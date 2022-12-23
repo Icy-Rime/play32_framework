@@ -1,15 +1,12 @@
-from play32hw.hw_config import PIN_BATTERY
-from machine import Pin, ADC
+from play32hw.hw_config import get_model, MODEL_INITIAL, MODEL_EMULATOR
 
-__bat_adc = None
+if get_model() == MODEL_INITIAL:
+    from play32hw.pinitial.hal_battery import *
+elif get_model() == MODEL_EMULATOR:
+    from play32hw.pemulator.hal_battery import *
+else:
+    def init():
+        pass
 
-def init():
-    global __bat_adc
-    if __bat_adc != None:
-        return
-    __bat_adc = ADC(Pin(PIN_BATTERY))
-    __bat_adc.atten(ADC.ATTN_0DB)
-    __bat_adc.width(ADC.WIDTH_12BIT)
-
-def get_raw_battery_value():
-    return __bat_adc.read()
+    def get_raw_battery_value():
+        return 0

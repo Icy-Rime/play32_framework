@@ -1,21 +1,24 @@
-SCREEN_WIDTH = 128
-SCREEN_HEIGHT = 64
-SCREEN_DRIVER = "ssd1306" # "ssd1351"
-SCREEN_SCL = 18
-SCREEN_SDA_MOSI = 19
-SCREEN_CS = 0
-SCREEN_DC = 0
-SCREEN_RST = 0
-PIN_KEY_A = 34
-PIN_KEY_B = 35
-PIN_KEY_UP = 15
-PIN_KEY_DOWN = 13
-PIN_KEY_LEFT = 12
-PIN_KEY_RIGHT = 14
-PIN_BUZZ = 5
-PIN_LED = 27
-PIN_BATTERY = 36
-PIN_SD_CS = 22
-PIN_SD_SCK = 23
-PIN_SD_MISO = 25
-PIN_SD_MOSI = 26
+import usys
+
+MODEL_UNKNOWN = 0
+MODEL_INITIAL = 1
+MODEL_EMULATOR = 0xFFFF
+
+__model = -1
+
+def get_model():
+    global __model
+    if __model < 0:
+        # init model
+        try:
+            mch = usys.implementation._machine # type: str
+        except:
+            mch = usys.implementation.machine # type: str
+        mch = mch[:mch.find(" with ")]
+        __model = MODEL_UNKNOWN
+        if mch == "Play32 Initial":
+            __model = MODEL_INITIAL
+        elif mch == "Play32 Emulator":
+            __model = MODEL_EMULATOR
+    return __model
+get_model()

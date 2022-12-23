@@ -31,11 +31,3 @@ else:
 print("==== End Main ====")
 
 # test below
-# from play32sys import network_helper
-# from play32sys import network_file_system
-# wlan = network_helper.connect(True)
-# print(wlan.ifconfig())
-# network_helper.sync_time()
-# network_file_system.mount(b'12345678', b'12345678', "192.168.31.37")
-
-# f = open("/mnt/README.md", "a")

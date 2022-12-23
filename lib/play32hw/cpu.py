@@ -1,25 +1,32 @@
-from machine import freq
-from usys import print_exception
+from play32hw.hw_config import get_model, MODEL_INITIAL, MODEL_EMULATOR
 
-VERY_SLOW = 40_000_000
-SLOW = 80_000_000
-MIDDLE = 160_000_000
-FAST = 240_000_000
+if get_model() == MODEL_INITIAL:
+    from play32hw.hesp32.cpu import *
+elif get_model() == MODEL_EMULATOR:
+    from play32hw.hemu.cpu import *
+else:
+    from utime import sleep_ms
 
-class CPUContextManager():
-    def __init__(self, target_speed):
-        self.__s = target_speed
-        self.__o = freq()
-    
-    def __enter__(self):
-        self.__o = freq()
-        freq(self.__s)
-    
-    def __exit__(self, type, value, trace):
-        freq(self.__o)
+    VERY_SLOW = 40_000_000
+    SLOW = 80_000_000
+    MIDDLE = 160_000_000
+    FAST = 240_000_000
 
-def set_cpu_speed(speed):
-    freq(speed)
+    class CPUContextManager():
+        def __init__(self, target_speed):
+            pass
+        
+        def __enter__(self):
+            pass
+        
+        def __exit__(self, type, value, trace):
+            pass
 
-def cpu_speed_context(speed):
-    return CPUContextManager(speed)
+    def set_cpu_speed(speed):
+        pass
+
+    def cpu_speed_context(speed):
+        return CPUContextManager(speed)
+
+    def sleep(ms):
+        sleep_ms(ms)
