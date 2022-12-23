@@ -25,7 +25,7 @@ BUFFER_SIZE = const(4096)
 
 def start_ftp():
     ap = network_helper.ap("Play32AP", "12345678")
-    utime.sleep(1.0)
+    utime.sleep(1)
     ip = ap.ifconfig()[0]
     ftp = microftpd.FTPServer(ip)
     ftp.init()
@@ -41,6 +41,7 @@ def start_ftp():
     console.log("Put framework.pack and sha256 file into /tmp .")
     print("Press A+B to update.")
     console.log("Press A+B to update.")
+    utime.sleep(5)
     is_key_pressed = hal_keypad.is_key_pressed
     KEY_A = hal_keypad.KEY_A
     KEY_B = hal_keypad.KEY_B

@@ -13,6 +13,8 @@ def connect(waiting=False):
     wlan.active(True)
     ssid = get_sys_config('wifi_ssid')
     passwd = get_sys_config('wifi_pass')
+    wlan.config(dhcp_hostname=get_sys_config("hostname", "play32"))
+    print("hostname:", get_sys_config("hostname", "play32"))
     if ssid != None and passwd != None:
         if not wlan.isconnected():
             wlan.connect(ssid, passwd)
