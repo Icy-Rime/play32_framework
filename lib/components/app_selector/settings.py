@@ -37,7 +37,7 @@ def wifi_menu():
             set_sys_config("wifi_ssid", ssid)
             save_sys_config()
         elif sel == 1:
-            pwd = get_sys_config("wifi_pass")
+            pwd = get_sys_config("wifi_pass", "")
             pwd = input_text(pwd, "Password")
             set_sys_config("wifi_pass", pwd)
             save_sys_config()
