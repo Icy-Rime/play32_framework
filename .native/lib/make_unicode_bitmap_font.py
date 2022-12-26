@@ -10,9 +10,6 @@ from typing import List, Tuple
 
 current_path = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(current_path)
-# sys.path.append(os.path.join(current_path, "..", "..", "text_utils", "coding"))
-# sys.path.append(os.path.join(current_path, "..", "ssd1306desktop"))
-# sys.path.append(os.path.join(current_path, "..", "utils"))
 
 from PIL import Image, ImageFont, ImageDraw
 import math

@@ -24,7 +24,7 @@ def select_menu_gen(text="", title="", options=[], text_yes="OK", text_no="CANCE
     TEXT_H = SH - FH - FH - TITLE_H
     OP_SIZE = len(options)
     if isinstance(text, str):
-        paged_text = PagedText(text, SW, TEXT_H, FW, FH)
+        paged_text = PagedText(text, F8, SW, TEXT_H)
     else:
         paged_text = None
     pointer = 0
@@ -93,9 +93,9 @@ def select_list_gen(title="", options=[], text_yes="OK", text_no="CANCEL"):
     LIST_PAGE_SIZE = LIST_AREA_H // FH
     LIST_OFFSET_X = (LIST_AREA_W % FW) // 2
     if OP_SIZE > 0:
-        paged_text = PagedText(options[0], LIST_AREA_W, FH, FW, FH, style_inline=True)
+        paged_text = PagedText(options[0], F8, LIST_AREA_W, FH, style_inline=True)
     else:
-        paged_text = PagedText("", LIST_AREA_W, FH, FW, FH, style_inline=True)
+        paged_text = PagedText("", F8, LIST_AREA_W, FH, style_inline=True)
     pointer = 0
     redraw = True
     while True:
@@ -114,7 +114,7 @@ def select_list_gen(title="", options=[], text_yes="OK", text_no="CANCEL"):
             if OP_SIZE > 0 and (ekey == KEY_UP or ekey == KEY_DOWN):
                 pointer += 1 if ekey == KEY_DOWN else -1
                 pointer %= OP_SIZE
-                paged_text = PagedText(options[pointer], LIST_AREA_W, FH, FW, FH, style_inline=True)
+                paged_text = PagedText(options[pointer], F8, LIST_AREA_W, FH, style_inline=True)
                 redraw = True
         if redraw:
             with cpu_speed_context(FAST):

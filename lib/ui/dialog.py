@@ -23,7 +23,7 @@ def dialog_gen(text="", title="", text_yes="OK", text_no="OK"):
     TITLE_H = FH if title else 0
     TEXT_H = SH - FH - TITLE_H
     if isinstance(text, str):
-        paged_text = PagedText(text, SW, TEXT_H, FW, FH)
+        paged_text = PagedText(text, F8, SW, TEXT_H,)
     else:
         paged_text = None
     redraw = True

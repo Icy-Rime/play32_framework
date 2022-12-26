@@ -30,7 +30,7 @@ def progress_gen(text="", title="", progress=None):
     BAR_AW = SW - 4
     BAR_AH = FH - 4
     if isinstance(text, str):
-        paged_text = PagedText(text, SW, TEXT_H, FW, FH)
+        paged_text = PagedText(text, F8, SW, TEXT_H)
     else:
         paged_text = None
     running_offset = 0.0

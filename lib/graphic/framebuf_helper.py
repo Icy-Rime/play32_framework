@@ -1,7 +1,6 @@
 from framebuf import RGB565, MONO_VLSB, MONO_HMSB, MONO_HLSB
 from uctypes import NATIVE, UINT8, UINT16, UINT32, struct
 import framebuf
-import micropython
 
 RAW_PTR = UINT32 # bytes
 

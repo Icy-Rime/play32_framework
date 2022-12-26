@@ -4,6 +4,20 @@ _threshold = (gc.mem_free() * 60) // 100 # 60% gc auto collect
 gc.threshold(_threshold)
 print("gc threshold has been set to", _threshold)
 del _threshold
+
+# utils in repl
+from play32sys import path
+def _clean_up():
+    for file in [
+        "/.mpypack_sha256.json",
+        "/framework_debug",
+        "/boot.py",
+        "/main.py",
+        "/lib",
+    ]:
+        if path.exist(file):
+            path.rmtree(file)
+
 # >>>> recovery mode <<<<
 import hal_keypad
 hal_keypad.init()

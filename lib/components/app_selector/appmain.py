@@ -1,4 +1,5 @@
 from graphic import framebuf_helper, pbm
+from graphic.bmfont import get_text_lines, get_text_width
 from play32sys import path, app, battery
 from play32sys.sys_config import get_sys_config
 from play32hw import cpu
@@ -83,9 +84,10 @@ def render_point_app():
     FONT_8.draw_on_frame("<", frame, 0, 24, COLOR_WHITE)
     FONT_8.draw_on_frame(">", frame, offset_x_arrows_right, 24, COLOR_WHITE)
     # draw app_name
-    if len(display_name) > MAX_NAME_LENGTH:
-        display_name = display_name[:MAX_NAME_LENGTH]
-    width_display_name = FNT_W * len(display_name)
+    display_name_lines = get_text_lines(display_name, FONT_8, SCR_W, FNT_H)
+    if len(display_name_lines) > 0:
+        display_name = display_name[:display_name_lines[0]]
+    width_display_name = get_text_width(display_name, FONT_8)
     offset_x_display_name = (SCR_W - width_display_name) // 2
     FONT_8.draw_on_frame(display_name, frame, offset_x_display_name, 56, COLOR_WHITE)
     # draw icon
@@ -105,7 +107,7 @@ def render_battery_level():
 def render_loading():
     frame = hal_screen.get_framebuffer()
     frame.fill(0)
-    width_text = FNT_W * len("loading")
+    width_text = get_text_width("loading", FONT_8)
     FONT_8.draw_on_frame("loading", frame, (SCR_W - width_text) // 2, (SCR_H - FNT_H) // 2, COLOR_WHITE)
     hal_screen.refresh()
 

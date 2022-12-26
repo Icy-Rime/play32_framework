@@ -10,6 +10,7 @@
 import hal_screen, hal_keypad
 from hal_keypad import parse_key_event, KEY_A, KEY_B, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, EVENT_KEY_PRESS
 from graphic.framebuf_helper import get_white_color
+from graphic.bmfont import FontDrawAscii
 from buildin_resource.font import get_font_8px
 from ui.utils import draw_label_nav, draw_label_header, draw_button, draw_label_invert, sleep_save_power
 from play32hw.cpu import cpu_speed_context, VERY_SLOW, FAST
@@ -120,7 +121,7 @@ class _KBD_TEXT:
         self.__redraw = True
     
     def _get_text_with_cursor(self, size):
-        cursor_char = "|" if self.__show_cursor else " "
+        cursor_char = "|" if self.__show_cursor else "'"
         if size <= self.__cursor - 1:
             return self.__text[self.__cursor-size+1:self.__cursor] + cursor_char
         else:
@@ -263,6 +264,7 @@ def input_text_gen(text="", title="Edit Text"):
     WHITE = get_white_color(hal_screen.get_format())
     SW, SH = hal_screen.get_size()
     F8 = get_font_8px()
+    F8_MONO = FontDrawAscii()
     FW, FH = F8.get_font_size()
     EDIT_TEXT_H = SH - (FH * 7)
     frame = hal_screen.get_framebuffer()
@@ -395,11 +397,15 @@ def input_text_gen(text="", title="Edit Text"):
                 draw_label_header(frame, 0, 0, SW, FH, F8, WHITE, title)
                 refresh = True
         for i in range(len(kbd_list)):
+            if isinstance(kbd_list[i], _KBD_LINE):
+                FONT = F8_MONO
+            else:
+                FONT = F8
             if kbd_list[i] == kbdl_txt:
-                refresh |= kbdl_txt.draw(frame, 0, FH, SW, EDIT_TEXT_H, F8, WHITE, redraw)
+                refresh |= kbdl_txt.draw(frame, 0, FH, SW, EDIT_TEXT_H, FONT, WHITE, redraw)
                 continue
             base_y = SH - FH*(kbd_line_size - i)
-            refresh |= kbd_list[i].draw(frame, 0, base_y, SW, FH, F8, WHITE, redraw)
+            refresh |= kbd_list[i].draw(frame, 0, base_y, SW, FH, FONT, WHITE, redraw)
         redraw = False
         if refresh:
             with cpu_speed_context(FAST):

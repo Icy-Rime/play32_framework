@@ -1,17 +1,18 @@
-from graphic.bmfont import get_text_count
+from graphic.bmfont import get_text_count, get_text_width, get_text_lines
 from play32hw.cpu import sleep
 
 sleep_time_ms = 0
 
 class PagedText:
-    def __init__(self, text, area_w, area_h, font_w, font_h, scroll_bar=None, style_inline=False):
+    def __init__(self, text, font, area_w, area_h, scroll_bar=None, style_inline=False):
         pages = []
+        font_w = font.get_font_size()[0]
         scroll_bar_width = font_w if style_inline else 4
         while len(text) > 0:
             if scroll_bar:
-                page_size = get_text_count(text, area_w - scroll_bar_width, area_h, font_w, font_h)
+                page_size = get_text_count(text, font, area_w - scroll_bar_width, area_h)
             else:
-                page_size = get_text_count(text, area_w, area_h, font_w, font_h)
+                page_size = get_text_count(text, font, area_w, area_h)
                 if scroll_bar == None and page_size < len(text):
                     # auto mode, need scroll_bar
                     scroll_bar = True
@@ -75,10 +76,15 @@ def _draw_labeled_text(frame, frame_x, frame_y, frame_w, frame_h, font_draw, col
     FW, FH = font_draw.get_font_size()
     # draw text
     ava_w = frame_w - FW
-    text_w = len(label) * FW
+    text_w = get_text_width(label, font_draw)
     if text_w > ava_w:
-        label = label[:ava_w // FW]
-        text_w = len(label) * FW
+        lines = get_text_lines(label, font_draw, ava_w, FH)
+        if len(lines) >  0:
+            label = label[:lines[0]]
+            text_w = get_text_width(label, font_draw)
+        else:
+            label = ""
+            text_w = 0
     text_offset_x = (FW // 2) + max((ava_w - text_w) // 2, 0)
     text_offset_y = max((frame_h - FH) // 2, 0)
     font_draw.draw_on_frame(label, frame, frame_x + text_offset_x, frame_y + text_offset_y, color_white, ava_w, FH)
@@ -154,7 +160,6 @@ def draw_label_invert(frame, frame_x, frame_y, frame_w, frame_h, font_draw, colo
 
 def draw_buttons_at_last_line(frame, frame_w, frame_h, font_draw, color_white, text_yes="YES", text_no="NO"):
     FW, FH = font_draw.get_font_size()
-    HFW = FW // 2
     SINGLE = text_yes == text_no
     base_y = frame_h - FH
     if SINGLE:

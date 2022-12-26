@@ -1,7 +1,7 @@
 '''
 framebuf tool kit Module
 '''
-from graphic.bmfont import FontDrawAscii, get_text_line
+from graphic.bmfont import FontDrawAscii, get_text_lines
 # Console
 class Console():
     def __init__(self, frame, width, height, font_draw=None, color=1, display_update_fun=None):
@@ -18,7 +18,7 @@ class Console():
         for t in args:
             txts.append(str(t))
         text = ' '.join(txts)
-        lines = get_text_line(text, self.__print_frame_width, self.__font_size[0])
+        lines = len(get_text_lines(text, self.__fd, self.__print_frame_width, -1))
         new_y = self.__print_y + lines * self.__font_size[1]
         if new_y > self.__print_frame_height:
             offset = new_y - self.__print_frame_height

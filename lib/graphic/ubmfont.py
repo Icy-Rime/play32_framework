@@ -1,15 +1,23 @@
-from graphic.bmfont import FontDraw, _draw_char_one_by_one
-import micropython
+from graphic.bmfont import FontDraw, arrange_text_gen
 from micropython import const
 
+ASCII_DATA_START = const(0X21)
+ASCII_DATA_END = const(0x7E)
+ASCII_T = const(9)
+ASCII_N = const(10)
+ASCII_R = const(13)
+ASCII_SPACE = const(32)
 BASE_OFFSET = const(770)# 2 + (256 * 3)
+
 class FontDrawUnicode(FontDraw):
-    def __init__(self, font_stream):
+    def __init__(self, font_stream, ascii_width=b''):
         self.__font_file = font_stream
         self.__seek = self.__font_file.seek
         self.__read = self.__font_file.read
         self.__area_offset = []
         self.__area_size = bytearray()
+        self.__ascii_width = ascii_width # type: bytes
+        self.__ascii_width_limit = len(ascii_width)
         self.__font_width = self.__font_file.read(1)[0]
         self.__font_height = self.__font_file.read(1)[0]
         w_block = self.__font_width // 8
@@ -27,7 +35,7 @@ class FontDrawUnicode(FontDraw):
             self.__area_size.append(size)
 
     # @timed_function
-    def _unicode_draw_char_on(self, _, frame_pixel, unicode:int, x:int, y:int, color):
+    def _unicode_draw_char_on(self, frame_pixel, unicode:int, x:int, y:int, color):
         if unicode > 0xFFFF:
             return
         area:int = unicode & 0xFF
@@ -71,8 +79,26 @@ class FontDrawUnicode(FontDraw):
                 xp = x
                 yp += 1
 
+    def get_char_width(self, unicode: int) -> int:
+        if unicode == ASCII_SPACE:
+            return self.__font_width // 2 # half width space
+        elif unicode == ASCII_N or unicode == ASCII_R:
+            return 0
+        ascii_offset = unicode - ASCII_DATA_START
+        if ascii_offset >= 0 and ascii_offset < self.__ascii_width_limit:
+            return self.__ascii_width[ascii_offset]
+        else:
+            return self.__font_width
+
     def get_font_size(self):
         return (self.__font_width, self.__font_height)
     
     def draw_on_frame(self, text, frame, x, y, color=1, width_limit=-1, height_limit=-1):
-        return _draw_char_one_by_one(frame, text, x, y, color, width_limit, height_limit, self.__font_width, self.__font_height, self._unicode_draw_char_on)
+        draw_char_on = self._unicode_draw_char_on
+        frame_pixel = frame.pixel
+        for count, unicode, cx, cy in arrange_text_gen(text, self, x, y, width_limit, height_limit):
+            if unicode == ASCII_T or unicode == ASCII_N or unicode == ASCII_R:
+                continue
+            if unicode >= 0:
+                draw_char_on(frame_pixel, unicode, cx, cy, color)
+        return count
