@@ -80,7 +80,7 @@ def render_point_app():
     app_name = app_list[app_pointer]
     display_name, _, display_icon = get_app_info(app_name)
     # draw arrows
-    offset_x_arrows_right = SCR_W - FNT_W
+    offset_x_arrows_right = SCR_W - FONT_8.get_char_width(b">"[0])
     FONT_8.draw_on_frame("<", frame, 0, 24, COLOR_WHITE)
     FONT_8.draw_on_frame(">", frame, offset_x_arrows_right, 24, COLOR_WHITE)
     # draw app_name
