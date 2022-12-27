@@ -1,7 +1,7 @@
 from play32sys import path
 import hal_battery
 BATTERY_RECORD_PATH = path.join(path.get_data_path(), "battery.dat")
-DEFAULT_BATTERY_CACHE_SIZE = 256
+DEFAULT_BATTERY_CACHE_SIZE = 64
 
 __battery_level = []
 __last_log = []
