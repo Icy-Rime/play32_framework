@@ -4,17 +4,15 @@ from graphic.framebuf_helper import get_white_color
 from graphic.bmfont import get_text_width
 from buildin_resource.font import get_font_8px
 from ui.utils import draw_buttons_at_last_line, draw_label_header, sleep_save_power
-from play32hw.cpu import cpu_speed_context, VERY_SLOW, FAST
 
 def input_slide(title="", text_yes="OK", text_no="CANCEL", slide_start = 0, slide_size = 100):
     """ show a dialog and display some text.
         return True/False
     """
-    with cpu_speed_context(VERY_SLOW):
-        for v in input_slide_gen(title, text_yes, text_no, slide_start, slide_size):
-            if v != None:
-                return v
-            sleep_save_power() # save power
+    for v in input_slide_gen(title, text_yes, text_no, slide_start, slide_size):
+        if v != None:
+            return v
+        sleep_save_power() # save power
 
 def input_slide_gen(title="", text_yes="OK", text_no="CANCEL", slide_start = 0, slide_size = 100):
     assert slide_start >= 0
@@ -45,28 +43,27 @@ def input_slide_gen(title="", text_yes="OK", text_no="CANCEL", slide_start = 0, 
                 value = min(slide_start + slide_size, value)
                 redraw = True
         if redraw:
-            with cpu_speed_context(FAST):
-                frame = hal_screen.get_framebuffer()
-                frame.fill(0)
-                # draw title
-                if TITLE_H > 0:
-                    draw_label_header(frame, 0, 0, SW, TITLE_H, F8, WHITE, title)
-                # draw slide text
-                t = str(value)
-                tw = get_text_width(t, F8)
-                offset_x = (SW - tw) // 2
-                offset_y = ((H_SLIDE_H - FH) // 2) + TITLE_H
-                F8.draw_on_frame(t, frame, offset_x, offset_y, WHITE, SW, FH)
-                # draw slide
-                offset_y = ((H_SLIDE_H - FH) // 2) + H_SLIDE_H + TITLE_H
-                ava_w = SLIDE_W - 4
-                bar_w = int(ava_w * (value / slide_size))
-                bar_w = min(ava_w, bar_w)
-                bar_w = max(1, bar_w)
-                frame.rect(FW, offset_y, SLIDE_W, FH, WHITE)
-                frame.fill_rect(FW + 2, offset_y + 2, bar_w, FH - 4, WHITE)
-                # draw button
-                draw_buttons_at_last_line(frame, SW, SH, F8, WHITE, text_yes, text_no)
-                redraw = False
-                hal_screen.refresh()
+            frame = hal_screen.get_framebuffer()
+            frame.fill(0)
+            # draw title
+            if TITLE_H > 0:
+                draw_label_header(frame, 0, 0, SW, TITLE_H, F8, WHITE, title)
+            # draw slide text
+            t = str(value)
+            tw = get_text_width(t, F8)
+            offset_x = (SW - tw) // 2
+            offset_y = ((H_SLIDE_H - FH) // 2) + TITLE_H
+            F8.draw_on_frame(t, frame, offset_x, offset_y, WHITE, SW, FH)
+            # draw slide
+            offset_y = ((H_SLIDE_H - FH) // 2) + H_SLIDE_H + TITLE_H
+            ava_w = SLIDE_W - 4
+            bar_w = int(ava_w * (value / slide_size))
+            bar_w = min(ava_w, bar_w)
+            bar_w = max(1, bar_w)
+            frame.rect(FW, offset_y, SLIDE_W, FH, WHITE)
+            frame.fill_rect(FW + 2, offset_y + 2, bar_w, FH - 4, WHITE)
+            # draw button
+            draw_buttons_at_last_line(frame, SW, SH, F8, WHITE, text_yes, text_no)
+            redraw = False
+            hal_screen.refresh()
         yield None

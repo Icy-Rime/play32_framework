@@ -1,5 +1,4 @@
 from ui.utils import sleep_save_power
-from play32hw.cpu import cpu_speed_context, VERY_SLOW
 import uos
 from play32sys import path
 from ui.progress import progress_gen
@@ -17,11 +16,10 @@ def _get_parent_dir(file_path):
     return "/"
 
 def select_file(cwd=None, title="Files", text_yes="OK", text_no="CANCEL", f_file=True, f_dir=True):
-    with cpu_speed_context(VERY_SLOW):
-        for v in select_file_gen(cwd, title, text_yes, text_no, f_file, f_dir):
-            if v != None:
-                return v
-            sleep_save_power() # save power
+    for v in select_file_gen(cwd, title, text_yes, text_no, f_file, f_dir):
+        if v != None:
+            return v
+        sleep_save_power() # save power
 
 def select_file_gen(cwd=None, title="Files", text_yes="OK", text_no="CANCEL", f_file=True, f_dir=True):
     if cwd == None:

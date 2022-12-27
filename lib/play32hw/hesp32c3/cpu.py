@@ -3,7 +3,7 @@ from machine import freq, lightsleep
 VERY_SLOW = 80_000_000
 SLOW = 80_000_000
 MIDDLE = 160_000_000
-FAST = 240_000_000
+FAST = 160_000_000
 
 class CPUContextManager():
     def __init__(self, target_speed):

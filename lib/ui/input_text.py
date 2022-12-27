@@ -13,7 +13,6 @@ from graphic.framebuf_helper import get_white_color
 from graphic.bmfont import FontDrawAscii
 from buildin_resource.font import get_font_8px
 from ui.utils import draw_label_nav, draw_label_header, draw_button, draw_label_invert, sleep_save_power
-from play32hw.cpu import cpu_speed_context, VERY_SLOW, FAST
 from ui._input_method import InputMethod
 from ui.select import select_list_gen
 from buildin_resource.input_dict import get_input_dict
@@ -55,19 +54,18 @@ class _KBD_LINE:
     
     def draw(self, frame, x, y, w, h, font, white, force=False):
         if self.__redraw or force:
-            with cpu_speed_context(FAST):
-                frame.fill_rect(x, y, w, h, 0)
-                FW, FH = font.get_font_size()
-                tw = len(self.__chs) * FW
-                offset = (w - tw) // 2
-                font.draw_on_frame(self.__chs, frame, x+offset, y, white, w, h)
-                if self.__focus >= 0:
-                    ch = self.__chs[self.__focus]
-                    off = offset + FW * self.__focus
-                    frame.fill_rect(x+off, y, FW, FH, white)
-                    font.draw_on_frame(ch, frame, x+off, y, 0, FW, FH)
-                self.__redraw = False
-                return True # changed
+            frame.fill_rect(x, y, w, h, 0)
+            FW, FH = font.get_font_size()
+            tw = len(self.__chs) * FW
+            offset = (w - tw) // 2
+            font.draw_on_frame(self.__chs, frame, x+offset, y, white, w, h)
+            if self.__focus >= 0:
+                ch = self.__chs[self.__focus]
+                off = offset + FW * self.__focus
+                frame.fill_rect(x+off, y, FW, FH, white)
+                font.draw_on_frame(ch, frame, x+off, y, 0, FW, FH)
+            self.__redraw = False
+            return True # changed
         return False # nothing change
 
 class _KBD_OPTION:
@@ -102,13 +100,12 @@ class _KBD_OPTION:
     
     def draw(self, frame, x, y, w, h, font, white, force=False):
         if self.__redraw or force:
-            with cpu_speed_context(FAST):
-                black = white if self.__focus else 0
-                white = 0 if self.__focus else white
-                frame.fill_rect(x, y, w, h, black)
-                draw_label_nav(frame, x, y, w, h, font, white, self.get_focused_text())
-                self.__redraw = False
-                return True # changed
+            black = white if self.__focus else 0
+            white = 0 if self.__focus else white
+            frame.fill_rect(x, y, w, h, black)
+            draw_label_nav(frame, x, y, w, h, font, white, self.get_focused_text())
+            self.__redraw = False
+            return True # changed
         return False # nothing change
 
 class _KBD_TEXT:
@@ -172,18 +169,17 @@ class _KBD_TEXT:
             self.__show_cursor = (not self.__show_cursor)
             self.__last_ms = now
         if self.__redraw or force:
-            with cpu_speed_context(FAST):
-                black = white if self.__focus else 0
-                white = 0 if self.__focus else white
-                FW, FH = font.get_font_size()
-                char_count = w // FW
-                t = self._get_text_with_cursor(char_count)
-                offset_x = (w % FW) // 2
-                offset_y = (h % FH) // 2
-                frame.fill_rect(x, y, w, h, black)
-                font.draw_on_frame(t, frame, x+offset_x, y+offset_y, white, w, h)
-                self.__redraw = False
-                return True # changed
+            black = white if self.__focus else 0
+            white = 0 if self.__focus else white
+            FW, FH = font.get_font_size()
+            char_count = w // FW
+            t = self._get_text_with_cursor(char_count)
+            offset_x = (w % FW) // 2
+            offset_y = (h % FH) // 2
+            frame.fill_rect(x, y, w, h, black)
+            font.draw_on_frame(t, frame, x+offset_x, y+offset_y, white, w, h)
+            self.__redraw = False
+            return True # changed
         return False # nothing change
 
 class _KBD_PINYIN:
@@ -234,25 +230,23 @@ class _KBD_PINYIN:
     
     def draw(self, frame, x, y, w, h, font, white, force=False):
         if self.__redraw or force:
-            with cpu_speed_context(FAST):
-                frame.fill_rect(x, y, w, h, 0)
-                if self.__focus:
-                    draw_label_invert(frame, x, y, w, h, font, white, self.__im.get_input_code())
-                else:
-                    draw_button(frame, x, y, w, h, font, white, self.__im.get_input_code())
-                self.__redraw = False
-                return True # changed
+            frame.fill_rect(x, y, w, h, 0)
+            if self.__focus:
+                draw_label_invert(frame, x, y, w, h, font, white, self.__im.get_input_code())
+            else:
+                draw_button(frame, x, y, w, h, font, white, self.__im.get_input_code())
+            self.__redraw = False
+            return True # changed
         return False # nothing change
 
 def input_text(text="", title="Edit Text"):
     """ show a dialog and display some text.
         return str
     """
-    with cpu_speed_context(VERY_SLOW):
-        for v in input_text_gen(text, title):
-            if v != None:
-                return v
-            sleep_save_power() # save power
+    for v in input_text_gen(text, title):
+        if v != None:
+            return v
+        sleep_save_power() # save power
 
 def input_text_gen(text="", title="Edit Text"):
     # test
@@ -392,10 +386,9 @@ def input_text_gen(text="", title="Edit Text"):
                     kbdl_txt.insert(action_code)
         # draw all element
         if redraw:
-            with cpu_speed_context(FAST):
-                frame.fill(0)
-                draw_label_header(frame, 0, 0, SW, FH, F8, WHITE, title)
-                refresh = True
+            frame.fill(0)
+            draw_label_header(frame, 0, 0, SW, FH, F8, WHITE, title)
+            refresh = True
         for i in range(len(kbd_list)):
             if isinstance(kbd_list[i], _KBD_LINE):
                 FONT = F8_MONO
@@ -408,7 +401,6 @@ def input_text_gen(text="", title="Edit Text"):
             refresh |= kbd_list[i].draw(frame, 0, base_y, SW, FH, FONT, WHITE, redraw)
         redraw = False
         if refresh:
-            with cpu_speed_context(FAST):
-                hal_screen.refresh()
-                refresh = False
+            hal_screen.refresh()
+            refresh = False
         yield None

@@ -146,12 +146,13 @@ def main_loop():
                 # ensure pointer
                 if key == KEY_LEFT or key == KEY_RIGHT:
                     SIZE = len(app_list)
-                    if 0 > app_pointer or SIZE <= app_pointer:
-                        app_pointer = (app_pointer + SIZE) % SIZE
-                    with cpu.cpu_speed_context(cpu.FAST):
-                        render_point_app()
-                        render_battery_level()
-                    should_refresh_screen = True
+                    if SIZE > 0:
+                        if 0 > app_pointer or SIZE <= app_pointer:
+                            app_pointer = (app_pointer + SIZE) % SIZE
+                        with cpu.cpu_speed_context(cpu.FAST):
+                            render_point_app()
+                            render_battery_level()
+                        should_refresh_screen = True
                 if key == KEY_A:
                     with cpu.cpu_speed_context(cpu.FAST):
                         run_app()

@@ -1,7 +1,9 @@
-from play32hw.hw_config import get_model, MODEL_INITIAL, MODEL_EMULATOR
+from play32hw.hw_config import get_model, MODEL_INITIAL, MODEL_LITE, MODEL_EMULATOR
 
 if get_model() == MODEL_INITIAL:
     from play32hw.pinitial.hal_keypad import *
+elif get_model() == MODEL_LITE:
+    from play32hw.plite.hal_keypad import *
 elif get_model() == MODEL_EMULATOR:
     from play32hw.pemulator.hal_keypad import *
 else:

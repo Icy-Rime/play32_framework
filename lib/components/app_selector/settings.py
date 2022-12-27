@@ -3,7 +3,6 @@ from ui.select import select_list
 from ui.progress import progress_gen
 from ui.input_text import input_text
 from ui.dialog import dialog
-from ui.utils import set_sleep_time
 from play32sys import network_helper
 from play32sys.sys_config import get_sys_config, set_sys_config, save_sys_config
 from utime import ticks_ms, ticks_diff
@@ -72,9 +71,7 @@ def settings_menu():
         if sel < 0:
             return
         elif sel == 0:
-            set_sleep_time(0)
             wifi_menu()
-            set_sleep_time(20)
         elif sel == 1:
             gc.collect()
             pg = progress_gen("Loading...", "FTP Mode")
