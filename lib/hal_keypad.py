@@ -23,6 +23,7 @@ else:
         return 0
 
     def get_key_name(key):
+        # type: (int) -> str
         return "K"
 
     def get_key_event():
@@ -34,6 +35,7 @@ else:
         return (event & 0xF0, event & 0x0F)
 
     def is_key_pressed(key):
+        # type: (int) -> bool
         return get_key_value(key) == 1
 
     def clear_key_status(keys):

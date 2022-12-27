@@ -5,6 +5,7 @@ if get_model() == MODEL_INITIAL:
 elif get_model() == MODEL_EMULATOR:
     from play32hw.pemulator.hal_screen import *
 else:
+    import framebuf
     def init():
         pass
 
@@ -14,7 +15,7 @@ else:
     def get_format():
         return 0
 
-    def get_framebuffer():
+    def get_framebuffer() -> framebuf.FrameBuffer:
         return None
 
     def refresh(x=0, y=0, w=0, h=0):
