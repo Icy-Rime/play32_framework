@@ -167,3 +167,62 @@ class BuzzPlayer():
     def set_event_callback(self, callback):
         ''' set event callback, (event_data, padding) -> None '''
         self.__event_callback = callback
+
+class DummyBuzzPlayer():
+    def __init__(self, bee_gpio_num, timer_id_num):
+        pass
+    
+    @property
+    def is_playing(self):
+        return False
+    
+    @property
+    def volume(self):
+        return 0
+
+    @property
+    def note_shift(self):
+        return 0
+
+    def _timer_callback(self, _=None):
+        # schedule(self.play_next_note, True)
+        pass
+
+    def note_on(self, note, volume):
+        pass
+
+    def note_off(self):
+        pass
+
+    def play_next_note(self, play_next_note=False):
+        pass
+
+    def init(self):
+        pass
+
+    def deinit(self):
+        pass
+
+    def start(self, loop=False):
+        pass
+
+    def stop(self):
+        pass
+
+    def load(self, buzz_sound_file):
+        pass
+
+    def unload(self):
+        pass
+
+    def set_volume(self, volume):
+        ''' set volume 0~9 '''
+        pass
+    
+    def set_note_shift(self, note_shift):
+        ''' set volume 0~9 '''
+        pass
+
+    def set_event_callback(self, callback):
+        ''' set event callback, (event_data, padding) -> None '''
+        pass

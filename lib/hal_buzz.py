@@ -5,8 +5,9 @@ if get_model() == MODEL_INITIAL:
 elif get_model() == MODEL_EMULATOR:
     from play32hw.pemulator.hal_buzz import *
 else:
+    from play32hw.buzz_note_sound import DummyBuzzPlayer
     def init():
         pass
 
     def get_buzz_player():
-        return None
+        return DummyBuzzPlayer(0, 0)

@@ -6,17 +6,18 @@ elif get_model() == MODEL_EMULATOR:
     from play32hw.pemulator.hal_screen import *
 else:
     import framebuf
+    _buffer = framebuf.FrameBuffer(bytearray(128*64//8), 128, 64, framebuf.MONO_HLSB)
     def init():
         pass
 
     def get_size():
-        return 0, 0
+        return 128, 64
 
     def get_format():
-        return 0
+        return framebuf.MONO_HLSB
 
     def get_framebuffer() -> framebuf.FrameBuffer:
-        return None
+        return _buffer
 
     def refresh(x=0, y=0, w=0, h=0):
         pass
