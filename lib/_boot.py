@@ -65,7 +65,7 @@ def _exist(pt):
         return False
 if not _exist("/framework_debug"):
     usys.path[:] = ['.frozen', 'lib', '', '/lib', '/']
-    micropython.alloc_emergency_exception_buf(100)
+    micropython.alloc_emergency_exception_buf(512)
     gc.collect()
     main() # main function
 else:
