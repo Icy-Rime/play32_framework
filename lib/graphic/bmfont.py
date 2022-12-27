@@ -65,13 +65,15 @@ def arrange_text_gen(text: str, font: FontDraw, x: int, y: int, width_limit: int
             unicode = unicode | (lead << (u8size * 6))
         # process special character
         char_width = get_char_width(unicode)
-        if unicode == ASCII_T:
+        if unicode == ASCII_N or unicode == ASCII_R:
+            char_width = 0
+        elif unicode == ASCII_T:
             char_width += font_width * TAB_SIZE
-        elif unicode == ASCII_R or unicode == ASCII_N or (width_limit > 0 and moved_x + char_width - x > width_limit):
+        if unicode == ASCII_N or (width_limit > 0 and moved_x + char_width - x > width_limit):
             moved_y += font_height
             moved_x = x
         if height_limit > 0 and (moved_y + font_height - y > height_limit):
-            if unicode == ASCII_R or unicode == ASCII_N:
+            if unicode == ASCII_N:
                 count += 1 # new line
             yield count, -1, 0, 0
             return
