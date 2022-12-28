@@ -1,18 +1,15 @@
 import machine
 
-# ADDRESS_RTC_FAST_MEMORY_START = 0x3FF8_0000
-# ADDRESS_RTC_FAST_MEMORY_END = 0x3FF8_2000
-# ADDRESS_RTC_FAST_MEMORY_SIZE = 0x3FF8_2000
-
 # upper 4k reserved by esp-idf?
 ADDRESS_RTC_SLOW_MEMORY_START = 0x5000_0000
 SIZE_RTC_SLOW_MEMORY = 0x0000_2000
 
 class RTCMemory():
     def __init__(self, offset=0, size=SIZE_RTC_SLOW_MEMORY):
+        assert offset >= 0
+        assert offset + size <= SIZE_RTC_SLOW_MEMORY
         self.__ofs = offset + ADDRESS_RTC_SLOW_MEMORY_START
         self.__s = size
-        assert offset + size <= SIZE_RTC_SLOW_MEMORY
 
     def __len__(self):
         return self.__s

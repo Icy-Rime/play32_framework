@@ -5,17 +5,20 @@ from graphic.bmfont import get_text_width
 from buildin_resource.font import get_font_8px
 from ui.utils import draw_buttons_at_last_line, draw_label_header, sleep_save_power
 
-def input_slide(title="", text_yes="OK", text_no="CANCEL", slide_start = 0, slide_size = 100):
-    """ show a dialog and display some text.
-        return True/False
+def input_slide(title="", text_yes="OK", text_no="CANCEL", slide_start = 0, slide_end = 100, slide_value = None):
+    """ show a slide input.
+        return a number
     """
-    for v in input_slide_gen(title, text_yes, text_no, slide_start, slide_size):
+    for v in input_slide_gen(title, text_yes, text_no, slide_start, slide_end, slide_value):
         if v != None:
             return v
         sleep_save_power() # save power
 
-def input_slide_gen(title="", text_yes="OK", text_no="CANCEL", slide_start = 0, slide_size = 100):
-    assert slide_start >= 0
+def input_slide_gen(title="", text_yes="OK", text_no="CANCEL", slide_start = 0, slide_end = 100, slide_value = None):
+    slide_size = slide_end - slide_start
+    assert slide_size > 0
+    if not isinstance(slide_value, int):
+        slide_value = slide_start
     WHITE = get_white_color(hal_screen.get_format())
     SW, SH = hal_screen.get_size()
     F8 = get_font_8px()
@@ -23,7 +26,7 @@ def input_slide_gen(title="", text_yes="OK", text_no="CANCEL", slide_start = 0, 
     TITLE_H = FH if title else 0
     H_SLIDE_H = (SH - FH - TITLE_H) // 2
     SLIDE_W = SW - FW - FW
-    value = slide_start
+    value = slide_value
     redraw = True
     while True:
         for event in hal_keypad.get_key_event():
@@ -31,7 +34,7 @@ def input_slide_gen(title="", text_yes="OK", text_no="CANCEL", slide_start = 0, 
             if etype != EVENT_KEY_PRESS:
                 continue
             if ekey == KEY_A or ekey == KEY_B:
-                yield value if ekey == KEY_A else -1 - value
+                yield value if ekey == KEY_A else slide_start -1 - value
             if ekey == KEY_UP or ekey == KEY_DOWN:
                 value += int(slide_size * 0.1) if ekey == KEY_UP else -int(slide_size * 0.1)
                 value = max(slide_start, value)
@@ -57,7 +60,7 @@ def input_slide_gen(title="", text_yes="OK", text_no="CANCEL", slide_start = 0, 
             # draw slide
             offset_y = ((H_SLIDE_H - FH) // 2) + H_SLIDE_H + TITLE_H
             ava_w = SLIDE_W - 4
-            bar_w = int(ava_w * (value / slide_size))
+            bar_w = int(ava_w * ((value - slide_start) / slide_size))
             bar_w = min(ava_w, bar_w)
             bar_w = max(1, bar_w)
             frame.rect(FW, offset_y, SLIDE_W, FH, WHITE)
