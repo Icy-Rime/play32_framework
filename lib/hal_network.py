@@ -1,12 +1,20 @@
-import ntptime, network
+try:
+    import network
+except:
+    from play32hw.mpy_ext import network
 from play32sys.sys_config import get_sys_config
-ALIYUN_NTP_HOST = "ntp.aliyun.com"
-ntptime.host = ALIYUN_NTP_HOST
 
 def sync_time():
     try:
+        from net import ntptime
         ntptime.settime()
     except: pass
+
+def get_wlan():
+    return network.WLAN(network.STA_IF)
+
+def get_ap():
+    return network.WLAN(network.AP_IF)
 
 def connect(waiting=False):
     wlan = network.WLAN(network.STA_IF)

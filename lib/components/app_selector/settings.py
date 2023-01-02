@@ -1,15 +1,15 @@
-import network, gc
+import gc
 from ui.select import select_list
 from ui.progress import progress_gen
 from ui.input_text import input_text
 from ui.dialog import dialog
-from play32sys import network_helper
+import hal_network
 from play32sys.sys_config import get_sys_config, set_sys_config, save_sys_config
 from utime import ticks_ms, ticks_diff
 from components.app_selector import ftp_mode
 
 def wifi_menu():
-    wlan = network.WLAN(network.STA_IF)
+    wlan = hal_network.get_wlan()
     while True:
         gc.collect()
         # sel = select_list("WIFI", ["SSID", "Password", "Connect", "Info", "Disconnect"])
@@ -44,7 +44,7 @@ def wifi_menu():
             start_time = ticks_ms()
             pg = progress_gen("Connecting...", "WIFI")
             next(pg)
-            network_helper.connect()
+            hal_network.connect()
             while not wlan.isconnected():
                 next(pg)
                 if ticks_diff(ticks_ms(), start_time) > 10000:
@@ -76,7 +76,10 @@ def settings_menu():
             gc.collect()
             pg = progress_gen("Loading...", "FTP Mode")
             next(pg)
-            ftp_mode.main()
+            try:
+                ftp_mode.main()
+            except:
+                dialog("Failed to start FTP Mode.")
 
 def main():
     settings_menu()
