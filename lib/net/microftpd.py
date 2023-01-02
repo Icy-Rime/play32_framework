@@ -1,9 +1,6 @@
 import usocket, uos, utime, ntptime
 from micropython import const
 
-# typing
-import socket
-
 _BUFFER_SIZE = const(4096)
 _BACKLOG = const(5)
 _PORT_BASE = const(10000)
@@ -19,7 +16,7 @@ FAIL_550_MESSAGE = "550 Failed\r\n"
 NTP_HOST = "ntp.aliyun.com"
 
 class TrySocket():
-    def __init__(self, sock:socket.socket, buffer_size=_BUFFER_SIZE):
+    def __init__(self, sock, buffer_size=_BUFFER_SIZE):
         if sock != None:
             sock.setblocking(False)
         self.__s = sock
