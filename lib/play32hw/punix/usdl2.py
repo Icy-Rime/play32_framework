@@ -22,7 +22,10 @@ SDL_WINDOW_OPENGL = 0x00000002
 SDL_WINDOW_FULLSCREEN_DESKTOP = SDL_WINDOW_FULLSCREEN | 0x00001000
 SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000
 SDL_WINDOWPOS_CENTERED = 0x2FFF0000
+SDL_RENDERER_SOFTWARE = 0x00000001
+SDL_RENDERER_ACCELERATED = 0x00000002
 SDL_RENDERER_PRESENTVSYNC = 0x00000004
+SDL_RENDERER_TARGETTEXTURE = 0x00000008
 SDL_TEXTUREACCESS_STREAMING = 1
 
 def SDL_DEFINE_PIXELFORMAT(type, order, layout, bits, bytes):
@@ -129,6 +132,7 @@ SDL_CreateWindow = _sdl.func("P", "SDL_CreateWindow", "siiiii")
 SDL_DestroyWindow = _sdl.func("v", "SDL_DestroyWindow", "P")
 
 SDL_CreateRenderer = _sdl.func("P", "SDL_CreateRenderer", "PiI")
+SDL_CreateSoftwareRenderer = _sdl.func("P", "SDL_CreateSoftwareRenderer", "P")
 SDL_DestroyRenderer = _sdl.func("v", "SDL_DestroyRenderer", "P")
 SDL_RenderSetLogicalSize = _sdl.func("i", "SDL_RenderSetLogicalSize", "Pii")
 SDL_SetRenderDrawColor = _sdl.func("i", "SDL_SetRenderDrawColor", "PBBBB")

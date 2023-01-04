@@ -1,5 +1,5 @@
 import framebuf
-from play32hw.punix.usdl2 import SDL_Init, SDL_INIT_VIDEO, SDL_WINDOWPOS_CENTERED, SDL_Quit
+from play32hw.punix.usdl2 import SDL_Init, SDL_INIT_VIDEO, SDL_WINDOWPOS_CENTERED, SDL_RENDERER_SOFTWARE, SDL_Quit
 from play32hw.punix.usdl2 import SDL_CreateWindow, SDL_CreateRenderer, SDL_RenderSetIntegerScale, SDL_DestroyWindow, SDL_DestroyRenderer
 from play32hw.punix.usdl2 import SDL_SetRenderDrawColor, SDL_RenderFillRect, SDL_RenderFillRects, SDL_RenderPresent
 from play32hw.punix.usdl2 import SDL_TRUE, SDL_Rect
@@ -18,8 +18,8 @@ def init():
         return
     _frame = framebuf.FrameBuffer(bytearray(SCREEN_WIDTH*SCREEN_HEIGHT//8), SCREEN_WIDTH, SCREEN_HEIGHT, framebuf.MONO_HLSB)
     SDL_Init(SDL_INIT_VIDEO)
-    _window = SDL_CreateWindow("Hello World", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH * PIXEL_SIZE, SCREEN_HEIGHT * PIXEL_SIZE, 0)
-    _renderer = SDL_CreateRenderer(_window, -1, 0)
+    _window = SDL_CreateWindow("Play32 UNIX", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH * PIXEL_SIZE, SCREEN_HEIGHT * PIXEL_SIZE, 0)
+    _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_SOFTWARE)
     SDL_RenderSetIntegerScale(_renderer, SDL_TRUE)
 
 def deinit():
