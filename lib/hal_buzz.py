@@ -1,7 +1,9 @@
-from play32hw.hw_config import get_model, MODEL_INITIAL, MODEL_EMULATOR
+from play32hw.hw_config import get_model, MODEL_INITIAL, MODEL_UNIX, MODEL_EMULATOR
 
 if get_model() == MODEL_INITIAL:
     from play32hw.pinitial.hal_buzz import *
+elif get_model() == MODEL_UNIX:
+    from play32hw.punix.hal_buzz import *
 elif get_model() == MODEL_EMULATOR:
     from play32hw.pemulator.hal_buzz import *
 else:

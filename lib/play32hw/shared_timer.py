@@ -1,11 +1,20 @@
-from machine import Timer as HardwareTimer
-from utime import ticks_ms, ticks_diff, ticks_add
-from micropython import schedule
 from usys import print_exception
-ONE_SHOT = 0
-PERIODIC = 1
+try:
+    from machine import Timer as HardwareTimer
+except:
+    from play32hw.punix.software_timer import SoftwareTimer as HardwareTimer
+from utime import ticks_ms, ticks_diff, ticks_add
+try:
+    from micropython import schedule
+except:
+    def schedule(func, arg):
+        func(arg)
+
 _shared_timers = []
+
 class SharedTimer():
+    ONE_SHOT = 0
+    PERIODIC = 1
     def __init__(self, id, *_args, **_kws) -> None:
         self.__id = id
         self.__timer = HardwareTimer(id)
@@ -30,7 +39,7 @@ class SharedTimer():
                 callback(self)
             except Exception as e:
                 print_exception(e)
-        if mode == PERIODIC:
+        if mode == SharedTimer.PERIODIC:
             self._insert_irq((irq_id, callback, ticks_add(target_time_ms, priod), mode, priod))
         self._set_timer()
         

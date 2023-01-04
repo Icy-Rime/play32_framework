@@ -1,12 +1,43 @@
 # path operation
+from play32hw.hw_config import get_model, MODEL_UNIX
 import uos
 FILE_TYPE_DIR = 0x4000
 FILE_TYPE_FILE = 0X8000
 
-__ROOT_BASE = '/'
-__APP_BASE = '/apps'
-__DATA_BASE = '/data'
-__TMP_BASE = '/tmp'
+def abspath(pt):
+    # type: (str) -> str
+    if pt.startswith('/'):
+        return pt
+    else:
+        c = uos.getcwd()
+        return join(c, pt)
+
+def join(pt1, *pts):
+    # type: (str, str) -> str
+    for pt in pts:
+        if pt.endswith('/'):
+            pt = pt[:-1]
+        if pt.startswith('/'):
+            pt1 = pt
+        elif pt == '..':
+            rid = pt1.rfind('/')
+            if rid > 0:
+                pt1 = pt1[:rid]
+            elif rid == 0:
+                pt1 = '/'
+            else:
+                pt1 = ''
+        else:
+            pt1 += '' if pt1.endswith('/') else '/'
+            pt1 += pt
+    if pt1.endswith('/') and len(pt1) > 1:
+        pt1 = pt1[:-1]
+    return pt1
+
+__ROOT_BASE = join(abspath(join(__file__, '..')), '..', '..', '.play32root') if get_model() == MODEL_UNIX else '/'
+__APP_BASE = join(__ROOT_BASE, 'apps') if get_model() == MODEL_UNIX else '/apps'
+__DATA_BASE = join(__ROOT_BASE, 'data') if get_model() == MODEL_UNIX else '/data'
+__TMP_BASE = join(__ROOT_BASE, 'tmp') if get_model() == MODEL_UNIX else '/tmp'
 
 class TemporaryFileContext():
     def __init__(self, path):
@@ -14,7 +45,7 @@ class TemporaryFileContext():
         self.__f = None
     
     def __enter__(self):
-        self.__f = open(self.__p, "wb+")
+        self.__f = open(self.__p, 'wb+')
         return self.__f
     
     def __exit__(self, type, value, trace):
@@ -25,26 +56,6 @@ class TemporaryFileContext():
         try:
             uos.remove(self.__p)
         except: pass
-
-def join(pt1, *pts):
-    # type: (str, str) -> str
-    for pt in pts:
-        if pt.endswith('/'):
-            pt = pt[:-1]
-        if pt.startswith('/'):
-            pt1 = pt
-        else:
-            pt1 += '' if pt1.endswith('/') else '/'
-            pt1 += pt
-    return pt1
-
-def abspath(pt):
-    # type: (str) -> str
-    if pt.startswith('/'):
-        return pt
-    else:
-        c = uos.getcwd()
-        return join(c, pt)
 
 def exist(pt):
     try:
@@ -62,8 +73,8 @@ def rmtree(pt):
         uos.rmdir(pt)
 
 def mkdirs(pt):
-    parts = abspath(pt).split("/")
-    c_dir = parts[0]
+    parts = abspath(pt).split('/')
+    c_dir = "/"
     for p in parts:
         c_dir = join(c_dir, p)
         if exist(c_dir):
@@ -100,6 +111,8 @@ def clear_temporary_dir():
 
 
 def __ensure_dir__():
+    if not exist(__ROOT_BASE):
+        mkdirs(__ROOT_BASE)
     if not exist(__APP_BASE):
         uos.mkdir(__APP_BASE)
     if not exist(__DATA_BASE):

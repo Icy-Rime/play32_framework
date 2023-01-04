@@ -3,6 +3,7 @@ import usys
 MODEL_UNKNOWN = 0
 MODEL_INITIAL = 1
 MODEL_LITE = 2
+MODEL_UNIX = 0xFFFE
 MODEL_EMULATOR = 0xFFFF
 
 __model = -1
@@ -23,5 +24,7 @@ def get_model():
             __model = MODEL_LITE
         elif mch == "Play32 Emulator":
             __model = MODEL_EMULATOR
+        elif mch.startswith("linux"):
+            __model = MODEL_UNIX
     return __model
 get_model()

@@ -5,6 +5,7 @@
 !.vscode/extensions.json
 __pycache__
 .build
+.play32root
 data/**
 !data/hw_config.json
 !data/hw_config(ssd1351).json

@@ -1,7 +1,20 @@
 import uos, usys, ujson
-from play32sys.path import join, exist, get_tmp_path, get_app_path, clear_temporary_dir
+from play32sys.path import abspath, join, exist, get_tmp_path, get_app_path, clear_temporary_dir
 from buildin_resource.image import DEFAULT_BOOT_ICON
-from machine import reset as __soft_reset
+try:
+    from machine import reset as __soft_reset
+except:
+    def __soft_reset():
+        from play32hw.hw_config import get_model, MODEL_UNIX
+        if get_model() == MODEL_UNIX:
+            from play32hw.punix.hal_screen import deinit
+            deinit()
+            root_path = join(get_app_path(), '..', '..')
+            uos.chdir(root_path)
+            uos.system('micropython boot.py')
+            usys.exit()
+        else:
+            print("Play32 Reset.")
 import gc
 
 VERSION = (1, 17, 0)
