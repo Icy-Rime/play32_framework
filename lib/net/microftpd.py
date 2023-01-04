@@ -1,4 +1,5 @@
-import usocket, uos, utime, ntptime
+import usocket, uos, utime
+from net import ntptime
 from micropython import const
 
 _BUFFER_SIZE = const(4096)
