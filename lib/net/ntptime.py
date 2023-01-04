@@ -6,9 +6,11 @@ try:
     import ustruct as struct
 except:
     import struct
+from play32hw.hw_config import get_model, MODEL_UNIX
 
-# (date(2000, 1, 1) - date(1900, 1, 1)).days * 24*60*60
-NTP_DELTA = 3155673600
+# mpy: (date(2000, 1, 1) - date(1900, 1, 1)).days * 24*60*60
+# unix: (date(1970, 1, 1) - date(1900, 1, 1)).days * 24*60*60
+NTP_DELTA = 2208988800 if get_model() == MODEL_UNIX else 3155673600
 
 # The NTP host can be configured at runtime by doing: ntptime.host = 'myhost.org'
 # host = "pool.ntp.org"
