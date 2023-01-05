@@ -1,17 +1,27 @@
 import uos, usys, ujson
 from play32sys.path import abspath, join, exist, get_tmp_path, get_app_path, clear_temporary_dir
 from buildin_resource.image import DEFAULT_BOOT_ICON
+from play32hw.hw_config import get_model, MODEL_UNIX
 try:
     from machine import reset as __soft_reset
 except:
     def __soft_reset():
-        from play32hw.hw_config import get_model, MODEL_UNIX
         if get_model() == MODEL_UNIX:
+            mpy_exe = 'micropython'
+            argv = usys.argv # type: list[str]
+            for opt in argv:
+                if opt.startswith('-Ompypath='):
+                    mpy_exe = opt[len('-Ompypath='):]
+                elif opt.startswith('-Oapp='):
+                    usys.exit(0) # just exit it
             from play32hw.punix.hal_screen import deinit
+            from utime import sleep_ms
             deinit()
+            sleep_ms(500)
+            argv_text = ' '.join([ f'"{opt}"' for opt in argv[1:]])
             root_path = join(get_app_path(), '..', '..')
             uos.chdir(root_path)
-            uos.system('micropython boot.py')
+            uos.system(f'"{mpy_exe}" "boot.py" {argv_text}')
             usys.exit()
         else:
             print("Play32 Reset.")
@@ -53,13 +63,12 @@ def _on_boot_(app_name=None, *app_args, **app_kws):
     render_boot_image()
     # >>>> init <<<<
     # init what you need.
-    # import hal_keypad, hal_buzz, hal_led, hal_battery
-    # hal_keypad.init()
-    # hal_buzz.init()
-    # hal_led.init()
-    # hal_battery.init()
-    # >>>> start <<<<
-    # usys.path[:] = ['.frozen', 'lib', '', '/lib', '/'] # set in the _boot.py, no need to set again.
+    
+    argv = usys.argv # type: list[str]
+    for opt in argv:
+        if opt.startswith('-Oapp='):
+            app_name = opt[len('-Oapp='):]
+    
     if app_name != None:
         boot_app, args, kws = app_name, app_args, app_kws
     else:

@@ -2,10 +2,10 @@ from play32hw.punix.usdl2 import SDL_Init, SDL_INIT_AUDIO
 from play32hw.punix.usdl2 import SDL_AudioSpec, SDL_AUDIO_U8, SDL_AUDIO_CHANNEL_MONO
 from play32hw.punix.usdl2 import SDL_OpenAudioDevice, SDL_PauseAudioDevice, SDL_QueueAudio, SDL_GetQueuedAudioSize, SDL_ClearQueuedAudio
 from play32hw.shared_timer import get_shared_timer, SharedTimer
-from play32hw.buzz_note_sound import parse_bee_frame
+from play32hw.buzz_note_sound import parse_bee_frame, DummyBuzzPlayer
 from utime import ticks_ms, ticks_add, ticks_diff, sleep_ms
 from _thread import get_ident, allocate_lock, start_new_thread
-from usys import print_exception
+from usys import print_exception, argv
 from micropython import const
 
 TYPE_EMIT_EVENT = const(0X00)
@@ -304,7 +304,14 @@ def init():
     global __inited, __buzz
     if __inited:
         return
-    __buzz = SDLBuzzPlayer(0)
+    no_buzz = False
+    for opt in argv:
+        if opt == "-Onobuzz":
+            no_buzz = True
+    if no_buzz:
+        __buzz = DummyBuzzPlayer(0, 0)
+    else:
+        __buzz = SDLBuzzPlayer(0)
     __inited = True
 
 def get_buzz_player():

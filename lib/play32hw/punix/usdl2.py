@@ -161,9 +161,9 @@ SDL_RWFromMem = _sdl.func("P", "SDL_RWFromMem", "Pi")
 
 _SDL_GetKeyboardState = _sdl.func("P", "SDL_GetKeyboardState", "p")
 SDL_PollEvent = _sdl.func("i", "SDL_PollEvent", "p")
-SDL_ResetKeyboard = _sdl.func("v", "SDL_ResetKeyboard", "")
+# SDL_ResetKeyboard = _sdl.func("v", "SDL_ResetKeyboard", "")
 
-_SDL_GetDefaultAudioInfo = _sdl.func("i", "SDL_GetDefaultAudioInfo", "ppi")
+# _SDL_GetDefaultAudioInfo = _sdl.func("i", "SDL_GetDefaultAudioInfo", "ppi")
 _SDL_OpenAudioDevice = _sdl.func("I", "SDL_OpenAudioDevice", "PiPpi")
 _SDL_PauseAudioDevice = _sdl.func("v", "SDL_PauseAudioDevice", "Ii")
 _SDL_QueueAudio = _sdl.func("i", "SDL_QueueAudio", "IPI")
@@ -234,19 +234,19 @@ def SDL_AudioSpecDict(spec_buffer):
         "size": spec.size,
     }
 
-def SDL_GetDefaultAudioInfo():
-    # type: () -> tuple[str, bytearray]
-    name_ptr_buffer = bytearray(SIZE_SIZE_T)
-    spec_buffer = SDL_AudioSpec()
-    suc = _SDL_GetDefaultAudioInfo(name_ptr_buffer, spec_buffer)
-    print(suc == 0)
-    name_text_ptr = uctypes.struct(uctypes.addressof(name_ptr_buffer), STRUCT_RAW_PTR).ptr
-    if name_text_ptr != PTR_NULL:
-        name = read_cstring(name_text_ptr)
-        SDL_free(name_text_ptr)
-    else:
-        name = ""
-    return name, spec_buffer
+# def SDL_GetDefaultAudioInfo():
+#     # type: () -> tuple[str, bytearray]
+#     name_ptr_buffer = bytearray(SIZE_SIZE_T)
+#     spec_buffer = SDL_AudioSpec()
+#     suc = _SDL_GetDefaultAudioInfo(name_ptr_buffer, spec_buffer)
+#     print(suc == 0)
+#     name_text_ptr = uctypes.struct(uctypes.addressof(name_ptr_buffer), STRUCT_RAW_PTR).ptr
+#     if name_text_ptr != PTR_NULL:
+#         name = read_cstring(name_text_ptr)
+#         SDL_free(name_text_ptr)
+#     else:
+#         name = ""
+#     return name, spec_buffer
 
 def SDL_OpenAudioDevice(name, is_capture, desired, obtained, allowed_changes = 0):
     # type: (str, bool, bytearray, bytearray, int) -> int
