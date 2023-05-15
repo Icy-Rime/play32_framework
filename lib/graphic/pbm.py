@@ -29,7 +29,7 @@ def _read_header(instream):
     instream.seek(0)
     mg = instream.read(2)
     if mg != b"P1" and mg != b"P4":
-        return (-1, -1, b"UNKNOWN", -1)
+        return (-1, -1, b"UNKNOWN", -1, b"")
     # state machine
     comment = bytearray()
     buffer = bytearray() # list to store bytes
