@@ -28,3 +28,6 @@ def get_model():
             __model = MODEL_UNIX
     return __model
 get_model()
+
+class ResetException(Exception):
+    pass

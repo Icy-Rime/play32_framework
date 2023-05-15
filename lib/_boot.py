@@ -1,5 +1,6 @@
 import gc
 import uos
+from play32hw.hw_config import ResetException
 
 try:
     # esp32 setup
@@ -38,22 +39,8 @@ def main():
     # >>>> main <<<<
     else:
         del __count
-        try:
-            from play32sys import app
-            app._on_boot_()
-            pass
-        except Exception as e:
-            import usys
-            usys.print_exception(e)
-            text = str(e)
-            del e
-            gc.collect()
-            import hal_screen
-            hal_screen.init()
-            from ui.dialog import dialog
-            dialog(text, "Error")
-            from play32sys import app
-            app.reset_and_run_app("")
+        from play32sys import app
+        app._on_boot_()
     print("==== End Main ====")
 
 import usys, micropython
@@ -67,7 +54,24 @@ if not _exist("/framework_debug"):
     usys.path[:] = ['.frozen', 'lib', '', '/lib', '/']
     micropython.alloc_emergency_exception_buf(512)
     gc.collect()
-    main() # main function
+    while True:
+        try:
+            main() # main function
+        except ResetException:
+            continue
+        except Exception as e:
+            import usys
+            usys.print_exception(e)
+            text = str(e)
+            del e
+            gc.collect()
+            import hal_screen
+            hal_screen.init()
+            from ui.dialog import dialog
+            dialog(text, "Error")
+            from play32sys import app
+            app.reset_and_run_app("")
+        break
 else:
     usys.path[:] = ['lib', '', '/lib', '/', '.frozen']
     # let micropython load boot.py and main.py

@@ -2,7 +2,8 @@ import hal_network
 from micropython import const
 from play32sys import path
 from graphic import framebuf_console, framebuf_helper, abmfont
-import utime, uos, usys, uhashlib, machine
+import utime, uos, usys, uhashlib
+from play32hw.cpu import reset
 # screen console
 import hal_screen, hal_keypad
 hal_screen.init()
@@ -56,7 +57,7 @@ def start_ftp():
         if is_key_pressed(KEY_A) and is_key_pressed(KEY_B):
             try:
                 if update_framework():
-                    machine.reset()
+                    reset()
             except:
                 print("update failed. Please check your framework pack.")
                 console.log("update failed. Please check your framework pack.")
@@ -151,7 +152,7 @@ def update_framework():
 def _on_enter_recovery_mode_():
     try:
         if update_framework():
-            machine.reset()
+            reset()
     except Exception as e:
         usys.print_exception(e)
     start_ftp()

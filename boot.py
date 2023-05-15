@@ -9,6 +9,7 @@ try:
     try:
         from play32hw import hw_config
     except:
+        # append library path
         import uos
         def abspath(pt):
             # type: (str) -> str
@@ -54,5 +55,3 @@ except Exception as e:
     import usys
     usys.print_exception(e)
 del machine, micropython
-#import webrepl
-#webrepl.start()

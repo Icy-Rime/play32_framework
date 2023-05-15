@@ -1,4 +1,4 @@
-from machine import freq, lightsleep
+from machine import freq, lightsleep, reset as machine_reset
 
 VERY_SLOW = 80_000_000
 SLOW = 80_000_000
@@ -25,3 +25,6 @@ def cpu_speed_context(speed):
 
 def sleep(ms):
     lightsleep(ms)
+
+def reset():
+    machine_reset()
