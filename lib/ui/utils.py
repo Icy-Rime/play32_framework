@@ -68,7 +68,7 @@ class PagedText:
                 total_pages = len(self.pages)
                 scroll_h = max(int(area_h / total_pages), 1)
                 scroll_start = int(self.mark * area_h / total_pages)
-                frame.fill_rect(frame_x + frame_w - 3, frame_y + scroll_start + 2, 2, scroll_h, color_white)
+                frame.rect(frame_x + frame_w - 3, frame_y + scroll_start + 2, 2, scroll_h, color_white, True)
                 frame.hline(frame_x + frame_w - 4, frame_y, 4, color_white)
                 frame.hline(frame_x + frame_w - 4, frame_y + frame_h - 1, 4, color_white)
 
@@ -151,7 +151,7 @@ def draw_label_footer(frame, frame_x, frame_y, frame_w, frame_h, font_draw, colo
     frame.vline(frame_x + frame_w - HFW + 1, frame_y + 2, frame_h - 2, color_white)
 
 def draw_label_invert(frame, frame_x, frame_y, frame_w, frame_h, font_draw, color_white, label):
-    frame.fill_rect(frame_x, frame_y, frame_w, frame_h, color_white)
+    frame.rect(frame_x, frame_y, frame_w, frame_h, color_white, True)
     _draw_labeled_text(frame, frame_x, frame_y, frame_w, frame_h, font_draw, 0, label)
     frame.pixel(frame_x, frame_y, 0)
     frame.pixel(frame_x + frame_w - 1, frame_y, 0)

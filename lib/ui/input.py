@@ -64,7 +64,7 @@ def input_slide_gen(title="", text_yes="OK", text_no="CANCEL", slide_start = 0, 
             bar_w = min(ava_w, bar_w)
             bar_w = max(1, bar_w)
             frame.rect(FW, offset_y, SLIDE_W, FH, WHITE)
-            frame.fill_rect(FW + 2, offset_y + 2, bar_w, FH - 4, WHITE)
+            frame.rect(FW + 2, offset_y + 2, bar_w, FH - 4, WHITE, True)
             # draw button
             draw_buttons_at_last_line(frame, SW, SH, F8, WHITE, text_yes, text_no)
             redraw = False

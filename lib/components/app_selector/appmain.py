@@ -101,7 +101,7 @@ def render_battery_level():
     offset_x_battery_level = SCR_W - width_battery_level
     width_clear = FNT_W * 3 # 100 battery
     offset_x_clear = SCR_W - width_clear
-    frame.fill_rect(offset_x_clear, 0, width_clear, FNT_H, 0)
+    frame.rect(offset_x_clear, 0, width_clear, FNT_H, 0, True)
     FONT_8.draw_on_frame(battery_level, frame, offset_x_battery_level, 0, COLOR_WHITE)
 
 def render_loading():

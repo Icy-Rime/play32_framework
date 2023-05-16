@@ -25,13 +25,13 @@ class Console():
             self.__print_y -= offset
             self.__print_frame.scroll(0, 0-offset)
             new_y = self.__print_frame_height
-        self.__print_frame.fill_rect(0, self.__print_y, self.__print_frame_width, lines * self.__font_size[1], 0)
+        self.__print_frame.rect(0, self.__print_y, self.__print_frame_width, lines * self.__font_size[1], 0, True)
         self.__fd.draw_on_frame(text, self.__print_frame, 0, self.__print_y, self.__color, self.__print_frame_width, self.__print_frame_height)
         self.__print_y = new_y
         if self.__show_f != None and show:
             self.__show_f()
     def clear(self, *_, show=True):
-        self.__print_frame.fill_rect(0, 0, self.__print_frame_width, self.__print_frame_height, 0)
+        self.__print_frame.rect(0, 0, self.__print_frame_width, self.__print_frame_height, 0, True)
         self.__print_y = 0
         if self.__show_f != None and show:
             self.__show_f()

@@ -124,7 +124,7 @@ def select_list_gen(title="", options=[], text_yes="OK", text_no="CANCEL"):
                     continue
                 offset_y = FH + FH * (i % LIST_PAGE_SIZE)
                 if i == pointer:
-                    frame.fill_rect(0, offset_y, LIST_AREA_W, FH, WHITE)
+                    frame.rect(0, offset_y, LIST_AREA_W, FH, WHITE, True)
                     paged_text.draw(frame, 0, offset_y, LIST_AREA_W, FH, F8, 0)
                 else:
                     F8.draw_on_frame(options[i], frame, LIST_OFFSET_X, offset_y, WHITE, LIST_AREA_W, FH)
@@ -133,7 +133,7 @@ def select_list_gen(title="", options=[], text_yes="OK", text_no="CANCEL"):
                 area_h = LIST_AREA_H - 4
                 scroll_h = max(int(area_h / OP_SIZE), 1)
                 scroll_start = int(pointer * area_h / OP_SIZE)
-                frame.fill_rect(SW - 3, FH + scroll_start + 2, 2, scroll_h, WHITE)
+                frame.rect(SW - 3, FH + scroll_start + 2, 2, scroll_h, WHITE, True)
                 frame.hline(SW - 4, FH, 4, WHITE)
                 frame.hline(SW - 4, FH + LIST_AREA_H - 1, 4, WHITE)
             # draw button

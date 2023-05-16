@@ -54,7 +54,7 @@ class _KBD_LINE:
     
     def draw(self, frame, x, y, w, h, font, white, force=False):
         if self.__redraw or force:
-            frame.fill_rect(x, y, w, h, 0)
+            frame.rect(x, y, w, h, 0, True)
             FW, FH = font.get_font_size()
             tw = len(self.__chs) * FW
             offset = (w - tw) // 2
@@ -62,7 +62,7 @@ class _KBD_LINE:
             if self.__focus >= 0:
                 ch = self.__chs[self.__focus]
                 off = offset + FW * self.__focus
-                frame.fill_rect(x+off, y, FW, FH, white)
+                frame.rect(x+off, y, FW, FH, white, True)
                 font.draw_on_frame(ch, frame, x+off, y, 0, FW, FH)
             self.__redraw = False
             return True # changed
@@ -102,7 +102,7 @@ class _KBD_OPTION:
         if self.__redraw or force:
             black = white if self.__focus else 0
             white = 0 if self.__focus else white
-            frame.fill_rect(x, y, w, h, black)
+            frame.rect(x, y, w, h, black, True)
             draw_label_nav(frame, x, y, w, h, font, white, self.get_focused_text())
             self.__redraw = False
             return True # changed
@@ -176,7 +176,7 @@ class _KBD_TEXT:
             t = self._get_text_with_cursor(char_count)
             offset_x = (w % FW) // 2
             offset_y = (h % FH) // 2
-            frame.fill_rect(x, y, w, h, black)
+            frame.rect(x, y, w, h, black, True)
             font.draw_on_frame(t, frame, x+offset_x, y+offset_y, white, w, h)
             self.__redraw = False
             return True # changed
@@ -230,7 +230,7 @@ class _KBD_PINYIN:
     
     def draw(self, frame, x, y, w, h, font, white, force=False):
         if self.__redraw or force:
-            frame.fill_rect(x, y, w, h, 0)
+            frame.rect(x, y, w, h, 0, True)
             if self.__focus:
                 draw_label_invert(frame, x, y, w, h, font, white, self.__im.get_input_code())
             else:

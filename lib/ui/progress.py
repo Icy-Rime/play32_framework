@@ -70,7 +70,7 @@ def progress_gen(text="", title="", progress=None):
             bar_w = int(BAR_AW * progress)
             bar_w = min(BAR_AW, bar_w)
             bar_w = max(1, bar_w)
-            frame.fill_rect(2, base_y + 2, bar_w, BAR_AH, WHITE)
+            frame.rect(2, base_y + 2, bar_w, BAR_AH, WHITE, True)
         else:
             now = ticks_ms()
             diff = ticks_diff(now, running_t)
