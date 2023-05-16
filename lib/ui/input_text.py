@@ -10,7 +10,7 @@
 import hal_screen, hal_keypad
 from hal_keypad import parse_key_event, KEY_A, KEY_B, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, EVENT_KEY_PRESS
 from graphic.framebuf_helper import get_white_color
-from graphic.bmfont import FontDrawAscii
+from graphic.bmfont import FontDrawAscii, get_text_width
 from buildin_resource.font import get_font_8px
 from ui.utils import draw_label_nav, draw_label_header, draw_button, draw_label_invert, sleep_save_power
 from ui._input_method import InputMethod
@@ -117,13 +117,33 @@ class _KBD_TEXT:
         self.__last_ms = ticks_ms()
         self.__redraw = True
     
-    def _get_text_with_cursor(self, size):
+    def _get_text_with_cursor(self, font, width_limit):
         cursor_char = "|" if self.__show_cursor else "'"
-        if size <= self.__cursor - 1:
-            return self.__text[self.__cursor-size+1:self.__cursor] + cursor_char
+        cursor_size = get_text_width(cursor_char, font)
+        width_limit -= cursor_size
+        text_limit_before = 0
+        sum_width = 0
+        char_index = self.__cursor - 1
+        while sum_width < width_limit and char_index >= 0:
+            sum_width += get_text_width(self.__text[char_index], font)
+            char_index -= 1
+            if (sum_width < width_limit):
+                text_limit_before += 1
+        size_before = get_text_width(self.__text[self.__cursor - text_limit_before : self.__cursor], font)
+        width_limit -= size_before
+        text_limit_after = 0
+        sum_width = 0
+        char_index = self.__cursor
+        while sum_width < width_limit and char_index < len(self.__text):
+            sum_width += get_text_width(self.__text[char_index], font)
+            char_index += 1
+            if (sum_width < width_limit):
+                text_limit_after += 1
+        if text_limit_after <= 0:
+            return self.__text[self.__cursor - text_limit_before : self.__cursor] + cursor_char
         else:
-            p1 = self.__text[:self.__cursor]
-            p2 = self.__text[self.__cursor: size - 1]
+            p1 = self.__text[self.__cursor - text_limit_before : self.__cursor]
+            p2 = self.__text[self.__cursor : self.__cursor + text_limit_after]
             return p1 + cursor_char + p2
 
     def move_cursor(self, offset):
@@ -172,8 +192,7 @@ class _KBD_TEXT:
             black = white if self.__focus else 0
             white = 0 if self.__focus else white
             FW, FH = font.get_font_size()
-            char_count = w // FW
-            t = self._get_text_with_cursor(char_count)
+            t = self._get_text_with_cursor(font, w)
             offset_x = (w % FW) // 2
             offset_y = (h % FH) // 2
             frame.rect(x, y, w, h, black, True)
