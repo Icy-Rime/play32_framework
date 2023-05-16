@@ -43,6 +43,7 @@ def main():
 # >>>> main <<<<
 from play32hw.hw_config import ResetException
 while True:
+    gc.collect()
     try:
         main() # main function
     except ResetException:

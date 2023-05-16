@@ -3,9 +3,10 @@ from play32hw.punix.usdl2 import SDL_AudioSpec, SDL_AUDIO_U8, SDL_AUDIO_CHANNEL_
 from play32hw.punix.usdl2 import SDL_OpenAudioDevice, SDL_PauseAudioDevice, SDL_QueueAudio, SDL_GetQueuedAudioSize, SDL_ClearQueuedAudio
 from play32hw.shared_timer import get_shared_timer, SharedTimer
 from play32hw.buzz_note_sound import parse_bee_frame, DummyBuzzPlayer
-from utime import ticks_ms, ticks_add, ticks_diff, sleep_ms
-from _thread import get_ident, allocate_lock, start_new_thread
+from utime import ticks_ms, ticks_add, ticks_diff, sleep_us
+from _thread import start_new_thread
 from usys import print_exception, argv
+from ucollections import deque
 from micropython import const
 
 TYPE_EMIT_EVENT = const(0X00)
@@ -37,40 +38,20 @@ class BeeAudioGenerator:
         self.duty = 512 # [0, 1024]
         self.volume = 9 # [0, 9]
         self.samples_count = 0
-        self.__thd = None
-        self.__lock = allocate_lock()
     
-    def __protect(fn):
-        def func(self, *args, **kwargs):
-            if not isinstance(self, BeeAudioGenerator) or get_ident() == self.__thd:
-                return fn(self, *args, **kwargs)
-            else:
-                self.__lock.acquire()
-                self.__thd = get_ident()
-                try:
-                    return fn(self, *args, **kwargs)
-                finally:
-                    self.__thd = None
-                    self.__lock.release()
-        return func
-    
-    @__protect
     def set_freq(self, freq):
         self.freq = freq
         self.samples_count = 0
     
-    @__protect
     def set_duty(self, duty):
         assert duty >= 0 and duty <= 1024
         self.duty = duty
         self.samples_count = 0
     
-    @__protect
     def set_volume(self, volume):
         assert volume >= 0 and volume <= 9
         self.volume = volume
     
-    @__protect
     def gen_buffer(self, buffer_size):
         sample_size = self.channels * self.sp_size
         samples = buffer_size // sample_size
@@ -102,6 +83,8 @@ class BeeAudioGenerator:
         return buffer
 
 class SDLAudioFeeder:
+    _ACT_NOTE_OFF = 0
+    _ACT_NOTE_ON = 1
     def __init__(self) -> None:
         SDL_Init(SDL_INIT_AUDIO)
         desired = SDL_AudioSpec(44100, SDL_AUDIO_U8, SDL_AUDIO_CHANNEL_MONO, 256)
@@ -109,35 +92,47 @@ class SDLAudioFeeder:
         self.__a_dev = SDL_OpenAudioDevice("", False, desired, obtained, 0)
         SDL_PauseAudioDevice(self.__a_dev, False)
         self.__b_gen = BeeAudioGenerator(44100, 1, 1)
-        self.__target_sample_size = 2048 # 100ms, 44100*1*1 / s
-        self.__thd = None
-        self.__lock = allocate_lock()
-        self.__keep = False
+        self.__target_sample_size = 1024 # 100ms, 44100*1*1 / s
+        self.__que = deque(tuple(), 16, 1)
+        self.__running = True
         self.__start_background()
+        self.__started = True
     
-    def __protect(fn):
-        def func(self, *args, **kwargs):
-            if not isinstance(self, SDLAudioFeeder) or get_ident() == self.__thd:
-                return fn(self, *args, **kwargs)
-            else:
-                self.__lock.acquire()
-                self.__thd = get_ident()
-                try:
-                    return fn(self, *args, **kwargs)
-                finally:
-                    self.__thd = None
-                    self.__lock.release()
-        return func
-
     @property
     def bee_generator(self):
         return self.__b_gen
     
     def __feeder(self):
-        while True:
+        keep = False
+        while self.__running:
+            sleep_us(500)
+            # check action queue
+            while True:
+                try:
+                    action = self.__que.popleft()
+                    (act, params) = action
+                    if act == SDLAudioFeeder._ACT_NOTE_OFF:
+                        SDL_ClearQueuedAudio(self.__a_dev)
+                        self.__b_gen.set_volume(0)
+                        self.__b_gen.set_freq(0)
+                        keep = False
+                    elif act == SDLAudioFeeder._ACT_NOTE_ON:
+                        note, volume, length_ms = params
+                        self.__b_gen.set_freq(_NOTE_FREQ[note])
+                        self.__b_gen.set_volume(volume)
+                        if length_ms < 0:
+                            SDL_ClearQueuedAudio(self.__a_dev)
+                            data = self.__b_gen.gen_buffer(self.__target_sample_size)
+                            SDL_QueueAudio(self.__a_dev, data)
+                            keep = True
+                        else:
+                            data = self.__b_gen.gen_buffer(length_ms * 44100 // 1000)
+                            SDL_QueueAudio(self.__a_dev, data)
+                            keep = False
+                except IndexError:
+                    break
             try:
-                self.__lock.acquire()
-                if not self.__keep:
+                if not keep:
                     continue
                 buffered = SDL_GetQueuedAudioSize(self.__a_dev)
                 lack_of_bytes = self.__target_sample_size - buffered
@@ -145,35 +140,24 @@ class SDLAudioFeeder:
                 SDL_QueueAudio(self.__a_dev, data)
             except Exception as e:
                 print_exception(e)
-            finally:
-                self.__lock.release()
+                break
+        self.__started = False
 
     def __start_background(self):
         start_new_thread(self.__feeder, tuple())
-    
-    def __set_keep(self, keep):
-        self.__keep = keep
 
-    @__protect
+    def __del__(self):
+        self.__running = False
+        while self.__started: # wait thread end
+            sleep_us(500)
+
     def note_off(self):
-        SDL_ClearQueuedAudio(self.__a_dev)
-        self.__b_gen.set_volume(0)
-        self.__b_gen.set_freq(0)
-        self.__set_keep(False)
-    
-    @__protect
+        action = (SDLAudioFeeder._ACT_NOTE_OFF, tuple())
+        self.__que.append(action)
+
     def note_on(self, note, volume, length_ms = -1):
-        self.__b_gen.set_freq(_NOTE_FREQ[note])
-        self.__b_gen.set_volume(volume)
-        if length_ms < 0:
-            SDL_ClearQueuedAudio(self.__a_dev)
-            data = self.__b_gen.gen_buffer(self.__target_sample_size)
-            SDL_QueueAudio(self.__a_dev, data)
-            self.__set_keep(True)
-        else:
-            data = self.__b_gen.gen_buffer(length_ms * 44100 // 1000)
-            SDL_QueueAudio(self.__a_dev, data)
-            self.__set_keep(False)
+        action = (SDLAudioFeeder._ACT_NOTE_ON, (note, volume, length_ms, ))
+        self.__que.append(action)
     
 class SDLBuzzPlayer:
     def __init__(self, timer_id_num):
@@ -189,7 +173,6 @@ class SDLBuzzPlayer:
         self.__loop = False
         # SDL
         self.__feeder = SDLAudioFeeder()
-        self.__b_gen = self.__feeder.bee_generator
         # status
         self.__is_playing = False
     
@@ -209,11 +192,11 @@ class SDLBuzzPlayer:
         # schedule(self.play_next_note, True)
         self.play_next_note(True)
 
-    def note_on(self, note, volume):
+    def note_on(self, note, volume, length_ms=-1):
         note = note + self.__note_shift
         note = 0 if note < 0 else note
         note = len(_NOTE_FREQ) - 1 if note >= len(_NOTE_FREQ) else note
-        self.__feeder.note_on(note, volume)
+        self.__feeder.note_on(note, volume, length_ms)
 
     def note_off(self):
         self.__feeder.note_off()
@@ -313,6 +296,13 @@ def init():
     else:
         __buzz = SDLBuzzPlayer(0)
     __inited = True
+
+def deinit():
+    global __inited, __buzz
+    if __inited:
+        __buzz.deinit()
+        __inited = False
+        __buzz = None
 
 def get_buzz_player():
     return __buzz

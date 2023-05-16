@@ -1,80 +1,77 @@
-from utime import ticks_us, ticks_diff, ticks_add
+from utime import ticks_us, ticks_diff, ticks_add, sleep_us
 from usys import print_exception
-from _thread import start_new_thread, allocate_lock, get_ident
+from ucollections import deque
+from _thread import start_new_thread
+
+_ACT_DEINIT = 0
+_ACT_INIT = 1
 
 class SoftwareTimer():
     ONE_SHOT = 0
     PERIODIC = 1
     def __init__(self, id, *, mode=PERIODIC, period= -1, callback=None):
-        self.__cb = None
-        self.__thd = None
-        self.__current_thd = 0
-        self.__target_us = 0
-        self.__period = 0
-        self.__mode = SoftwareTimer.ONE_SHOT
-        self.__lock = allocate_lock()
+        self.__started = False
+        self.__running = False
+        #
+        self.__que = deque(tuple(), 16, 1)
         self.init(mode=mode, period=period, callback=callback)
 
-    def __protect(fn):
-        def func(self, *args, **kwargs):
-            if not isinstance(self, SoftwareTimer) or get_ident() == self.__thd:
-                return fn(self, *args, **kwargs)
-            else:
-                self.__lock.acquire()
-                self.__thd = get_ident()
+    def __thread_function(self):
+        act = -1
+        cb = None
+        mode = SoftwareTimer.ONE_SHOT
+        target_us = 0
+        period_us = 0
+        while self.__running:
+            # check action queue
+            while True:
                 try:
-                    return fn(self, *args, **kwargs)
-                finally:
-                    self.__thd = None
-                    self.__lock.release()
-        return func
-
-    def __callback(self):
-        self.__current_thd = get_ident()
-        while True:
-            # waiting
-            while ticks_diff(ticks_us(), self.__target_us) < 0:
-                if get_ident() != self.__current_thd:
-                    return
-            # exec callback
+                    action = self.__que.popleft()
+                    (act, cb, mode, target_us, period_us) = action
+                    act = -1
+                except IndexError:
+                    break
+            # wait
+            if period_us <= 0 or cb == None or ticks_diff(ticks_us(), target_us) < 0:
+                # wait 500 us before continue
+                sleep_us(500)
+                continue
             try:
-                self.__lock.acquire()
-                self.__thd = get_ident()
-                if get_ident() == self.__current_thd and self.__cb != None:
-                    self.__cb(self)
-                    if self.__mode == SoftwareTimer.ONE_SHOT:
-                        return # end timer
-                    else:
-                        self.__target_us = ticks_add(self.__target_us, self.__period) # continue
+                # exec callback
+                cb(self)
+                # schedule next callback
+                if mode == SoftwareTimer.ONE_SHOT:
+                    cb = None
+                    mode = SoftwareTimer.ONE_SHOT
+                    target_us = 0
+                    period_us = 0
                 else:
-                    return # end timer
+                    target_us = ticks_add(target_us, period_us) # continue
             except Exception as e:
                 print_exception(e)
-            finally:
-                self.__thd = None
-                self.__lock.release()
+                print("================")
+                self.__started = False # notify thread end
+                return # error, exit
+        self.__started = False # notify thread end
 
-    @__protect
+    def __del__(self):
+        self.deinit()
+        self.__running = False
+        while self.__started: # wait thread end
+            sleep_us(500)
+
     def init(self, *, mode=ONE_SHOT, period=-1, callback=None):
         if callback == None:
             # deinit
-            self.__cb = None
-            self.__target_us = 0
-            self.__period = 0
-            self.__mode = SoftwareTimer.ONE_SHOT
+            self.deinit()
             return
-        self.__target_us = ticks_add(ticks_us(), period * 1_000)
-        self.__period = period * 1_000
-        self.__mode = mode
-        self.__cb = callback
-        start_new_thread(self.__callback, tuple())
+        action = (_ACT_INIT, callback, mode, ticks_add(ticks_us(), period * 1_000), period * 1_000)
+        self.__que.append(action)
+        if not self.__started:
+            self.__running = True
+            start_new_thread(self.__thread_function, tuple())
+            self.__started = True
 
-    @__protect
     def deinit(self):
-        self.__cb = None
-        self.__target_us = 0
-        self.__period = 0
-        self.__mode = SoftwareTimer.ONE_SHOT
-
-    def value(self):
-        return 0 # ?
+        action = (_ACT_DEINIT, None, SoftwareTimer.ONE_SHOT, 0, 0)
+        self.__que.append(action)

@@ -144,6 +144,8 @@ def reset_and_run_app(app_name, *args, **kws):
 def run_app(app_name, *args, **kws):
     curr = uos.getcwd()
     uos.chdir(get_app_path(app_name))
+    usys.path.insert(0, get_app_path(app_name))
+    usys.path.insert(0, join(get_app_path(app_name), "lib"))
     try:
         if "appmain" in usys.modules:
             del usys.modules["appmain"]
@@ -154,6 +156,8 @@ def run_app(app_name, *args, **kws):
     finally:
         if "appmain" in usys.modules:
             del usys.modules["appmain"]
+        usys.path.remove(get_app_path(app_name))
+        usys.path.remove(join(get_app_path(app_name), "lib"))
         uos.chdir(curr)
         gc.collect()
 

@@ -1,6 +1,8 @@
 from utime import sleep_ms
 from play32hw.hw_config import ResetException
-from play32hw.punix.hal_screen import deinit
+from play32hw.punix.hal_screen import deinit as scr_deinit
+from play32hw.punix.hal_buzz import deinit as buzz_deinit
+from play32hw.shared_timer import stop_all_timer
 
 VERY_SLOW = 40_000_000
 SLOW = 80_000_000
@@ -27,6 +29,10 @@ def sleep(ms):
     sleep_ms(ms)
 
 def reset():
-    deinit()
+    # clean up
+    scr_deinit()
+    buzz_deinit()
+    stop_all_timer()
     sleep_ms(500)
+    # reset
     raise ResetException()

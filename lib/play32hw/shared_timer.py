@@ -21,12 +21,15 @@ class SharedTimer():
         self.__irq_id = 0
         # sort on insert time, index 0 is the most recent irq
         self.__irqs = [] #(irq_id, callback, target_time_ms, mode, priod)
+        self._timer_callback_ref = self._timer_callback
+        self._schedule_callback_ref = self._schedule_callback
 
     @property
     def id(self):
         return self.__id
 
     def _timer_callback(self, _=None):
+        self.__timer.deinit()
         if len(self.__irqs) <= 0:
             return
         irq = self.__irqs[0]
@@ -42,6 +45,9 @@ class SharedTimer():
         if mode == SharedTimer.PERIODIC:
             self._insert_irq((irq_id, callback, ticks_add(target_time_ms, priod), mode, priod))
         self._set_timer()
+    
+    def _schedule_callback(self, t):
+        schedule(self._timer_callback_ref, t)
         
     def _insert_irq(self, irq):
         # insert and sort
@@ -60,14 +66,14 @@ class SharedTimer():
             period = ticks_diff(target_time, ticks_ms())
             if period < 1:
                 period = 1
-            self.__timer.deinit()
             self.__timer.init(
                 mode=HardwareTimer.ONE_SHOT,
                 period=period,
-                callback=lambda t: schedule(self._timer_callback, t)
+                callback=self._schedule_callback_ref
             )
 
     def init(self, mode=ONE_SHOT, period=0, callback=None):
+        self.__timer.deinit()
         irq_id = self.__irq_id
         self.__irq_id += 1
         irq = (irq_id, callback, ticks_add(ticks_ms(), period), mode, period)
@@ -93,3 +99,7 @@ def get_shared_timer(id=0):
     shared_timer = SharedTimer(id)
     _shared_timers.append((id, shared_timer))
     return shared_timer
+
+def stop_all_timer():
+    for _, shared_timer in _shared_timers:
+        shared_timer.deinit()
