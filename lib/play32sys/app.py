@@ -1,7 +1,8 @@
-import uos, usys, ujson
-from play32sys.path import join, exist, get_tmp_path, get_app_path, clear_temporary_dir
+import uos, usys
+from play32sys.path import join, exist, get_app_path, clear_temporary_dir
 from buildin_resource.image import DEFAULT_BOOT_ICON
-from play32hw.cpu import reset as __soft_reset
+from play32hw.hw_config import ResetException
+from boot_params import get_saved_dict, set_saved_dict
 
 import gc
 
@@ -10,27 +11,17 @@ KEY_BOOT_APP = 'bapp'
 KEY_BOOT_APP_PARAMS = 'bappp'
 KEY_BOOT_APP_KEYWORDS = 'bappk'
 KEY_BOOT_IMAGE_PATH = 'bimg'
-DICT_FILE_PATH = join(get_tmp_path(), 'boot.json')
 
 __boot_dict = None
 def __init_dict():
     global __boot_dict
     if __boot_dict == None:
-        pass
-    try:
-        with open(DICT_FILE_PATH, 'rb') as f:
-            __boot_dict = ujson.load(f)
-    except:
-        __boot_dict = {}
+        __boot_dict = get_saved_dict()
 
 def __save_dict():
-    if __boot_dict == None:
-        return
-    try:
-        with open(DICT_FILE_PATH, 'wt') as f:
-            ujson.dump(__boot_dict, f)
-    except Exception as e:
-        usys.print_exception(e)
+    global __boot_dict
+    if __boot_dict != None:
+        set_saved_dict(__boot_dict)
 
 # system function
 def _on_boot_(app_name=None, *app_args, **app_kws):
@@ -139,7 +130,7 @@ def reset_and_run_app(app_name, *args, **kws):
         set_boot_image(DEFAULT_BOOT_ICON)
     if render_boot_image():
         disable_boot_image()
-    __soft_reset()
+    raise ResetException()
 
 def run_app(app_name, *args, **kws):
     curr = uos.getcwd()

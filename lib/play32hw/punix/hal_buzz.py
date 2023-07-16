@@ -287,10 +287,10 @@ def init():
     global __inited, __buzz
     if __inited:
         return
-    no_buzz = False
+    no_buzz = True
     for opt in argv:
-        if opt == "-Onobuzz":
-            no_buzz = True
+        if opt == "-Obuzz":
+            no_buzz = False
     if no_buzz:
         __buzz = DummyBuzzPlayer(0, 0)
     else:

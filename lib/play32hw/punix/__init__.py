@@ -1,7 +1,7 @@
 # punix
 
 # support args:
-# -Onobuzz: disable buggy hal_buzz
+# -Obuzz: enable buggy hal_buzz
 # -Ofullscreen: Full Screen Mode
 # -OpixelsizeN: Screen Pixel Size (N between 1 ~ 16)
 # -OpixelgapN: Screen Pixel Gap (N between 0 ~ 4)

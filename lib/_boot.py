@@ -15,14 +15,8 @@ try:
 except: pass
 
 # main.py
-def main():
-    # >>>> config memory <<<<
-    import gc
-    _threshold = (gc.mem_free() * 60) // 100 # 60% gc auto collect
-    gc.threshold(_threshold)
-    print("gc threshold has been set to", _threshold)
-    del _threshold
-    # >>>> recovery mode <<<<
+# >>>> recovery mode <<<<
+def check_rec():
     import hal_keypad
     hal_keypad.init()
     hal_keypad.clear_key_status([hal_keypad.KEY_A, hal_keypad.KEY_B])
@@ -37,11 +31,10 @@ def main():
         import updater
         updater._on_enter_recovery_mode_()
     # >>>> main <<<<
-    else:
-        del __count
-        from play32sys import app
-        app._on_boot_()
-    print("==== End Main ====")
+    del __count
+
+# >>>> main <<<<
+check_rec()
 
 import usys, micropython
 # framework_debug
@@ -54,23 +47,45 @@ if not _exist("/framework_debug"):
     usys.path[:] = ['.frozen', 'lib', '', '/lib', '/']
     micropython.alloc_emergency_exception_buf(512)
     while True:
+        from play32hw.hw_config import ResetException
+        import gc
         gc.collect()
+        print("Free:", gc.mem_free())
         try:
-            main() # main function
+            import hal_keypad
+            hal_keypad.init()
+            from play32sys import app
+            app._on_boot_()
+            print("==== End Main ====")
         except ResetException:
+            # deinit
+            import hal_keypad
+            hal_keypad.clear_key_status([
+                hal_keypad.KEY_A,
+                hal_keypad.KEY_B,
+                hal_keypad.KEY_UP,
+                hal_keypad.KEY_DOWN,
+                hal_keypad.KEY_LEFT,
+                hal_keypad.KEY_RIGHT,
+            ])
+            from play32hw import ports
+            ports.before_reset()
+            # clear as much references as possible
+            import usys
+            keys = list(usys.modules.keys())
+            for name in keys:
+                if name == "boot_params":
+                    print("Reset: Skip clear 'boot_params' module.")
+                    continue
+                del usys.modules[name]
+            globals().clear()
+            locals().clear()
+            import gc
+            gc.collect()
             continue
         except Exception as e:
             import usys
             usys.print_exception(e)
-            text = str(e)
-            del e
-            gc.collect()
-            import hal_screen
-            hal_screen.init()
-            from ui.dialog import dialog
-            dialog(text, "Error")
-            from play32sys import app
-            app.reset_and_run_app("")
         break
 else:
     usys.path[:] = ['lib', '', '/lib', '/', '.frozen']

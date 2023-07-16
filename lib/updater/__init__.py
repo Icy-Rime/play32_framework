@@ -68,6 +68,8 @@ def start_ftp():
             return
         except Exception as e:
             usys.print_exception(e)
+        while is_key_pressed(KEY_A) or is_key_pressed(KEY_B):
+            pass # loop until keys released
 
 def check_update_file():
     try:
